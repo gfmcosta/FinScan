@@ -267,7 +267,7 @@ fun LoadingDots() {
             animation = keyframes {
                 durationMillis = 1400
                 0f at 0
-                -10f at 400
+                10f at 400
                 0f at 1400
             },
             repeatMode = RepeatMode.Restart
@@ -282,7 +282,7 @@ fun LoadingDots() {
             animation = keyframes {
                 durationMillis = 1400
                 0f at 200
-                -10f at 600
+                10f at 600
                 0f at 1400
             },
             repeatMode = RepeatMode.Restart
@@ -297,7 +297,7 @@ fun LoadingDots() {
             animation = keyframes {
                 durationMillis = 1400
                 0f at 400
-                -10f at 800
+                10f at 800
                 0f at 1400
             },
             repeatMode = RepeatMode.Restart
