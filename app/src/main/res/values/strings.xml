@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">FinScan</string>
+    <string name="home_label">Home</string>
+    <string name="receipts_label">Receipts</string>
+    <string name="scan_label">Scan</string>
+    <string name="reports_label">Reports</string>
+    <string name="settings_label">Settings</string>
+    <string name="home_monthly_spent_title">This month you have already spent</string>
+    <string name="home_category_spent_title">Top 5 most spent categories</string>
+    <string name="home_hi_title">Hi, </string>
 </resources>
