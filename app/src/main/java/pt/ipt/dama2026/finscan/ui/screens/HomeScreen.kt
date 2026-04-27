@@ -12,10 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
@@ -196,8 +195,17 @@ fun HomeScreen() {
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                // Simple Line Chart using Canvas
-                LineChartPlaceholder(
+                // Simple Bar Chart using Canvas
+                // TODO: Remove in PROD
+                val chartData = listOf(
+                    0.6f to EmeraldGreen,
+                    0.4f to IndigoTechnological,
+                    0.8f to AmberAlert,
+                    0.3f to Color.Magenta,
+                    0.5f to Color.Cyan
+                )
+                BarChartPlaceholder(
+                    data = chartData,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -206,16 +214,17 @@ fun HomeScreen() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Top 5 most spent categories
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     //TODO: Remove in PROD
-                    CategoryLegendItem("A", EmeraldGreen)
-                    CategoryLegendItem("B", IndigoTechnological)
-                    CategoryLegendItem("C", AmberAlert)
-                    CategoryLegendItem("D", Color.Magenta)
-                    CategoryLegendItem("E", Color.Cyan)
+                    CategoryLegendItem("Entertainment", EmeraldGreen)
+                    CategoryLegendItem("Restaurant", IndigoTechnological)
+                    CategoryLegendItem("University", AmberAlert)
+                    CategoryLegendItem("Car - Gasoline", Color.Magenta)
+                    CategoryLegendItem("Car - Tolls", Color.Cyan)
                 }
             }
         }
@@ -223,63 +232,59 @@ fun HomeScreen() {
 }
 
 @Composable
-fun LineChartPlaceholder(modifier: Modifier = Modifier) {
-    val chartColor = IndigoTechnological
-    Canvas(modifier = modifier) {
-        val width = size.width
-        val height = size.height
-        val points = listOf(0.2f, 0.5f, 0.3f, 0.6f, 0.4f, 0.8f, 0.7f, 0.9f)
-        val path = Path()
-        val fillPath = Path()
+fun BarChartPlaceholder(
+    data: List<Pair<Float, Color>>,
+    modifier: Modifier = Modifier
+) {
+    // Default values incrementing by 25%
+    val labels = listOf("100%", "75%", "50%", "25%", "0%")
 
-        val stepX = width / (points.size - 1)
-
-        points.forEachIndexed { index, value ->
-            val x = index * stepX
-            val y = height - (value * height * 0.8f) - (height * 0.1f) // Padding top/bottom
-            if (index == 0) {
-                path.moveTo(x, y)
-                fillPath.moveTo(x, height)
-                fillPath.lineTo(x, y)
-            } else {
-                path.lineTo(x, y)
-                fillPath.lineTo(x, y)
-            }
-            if (index == points.size - 1) {
-                fillPath.lineTo(x, height)
-                fillPath.close()
+    Row(modifier = modifier) {
+        // Y-Axis Labels
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(vertical = 4.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.End
+        ) {
+            labels.forEach { label ->
+                Text(
+                    text = label,
+                    fontSize = 10.sp,
+                    color = Color.Gray
+                )
             }
         }
 
-        // Draw fill gradient
-        drawPath(
-            path = fillPath,
-            brush = Brush.verticalGradient(
-                colors = listOf(chartColor.copy(alpha = 0.3f), Color.Transparent)
-            )
-        )
+        Spacer(modifier = Modifier.width(12.dp))
 
-        // Draw line
-        drawPath(
-            path = path,
-            color = chartColor,
-            style = Stroke(width = 3.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
-        )
+        // Bars
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+        ) {
+            val width = size.width
+            val height = size.height
 
-        // Draw points
-        points.forEachIndexed { index, value ->
-            val x = index * stepX
-            val y = height - (value * height * 0.8f) - (height * 0.1f)
-            drawCircle(
-                color = chartColor,
-                radius = 4.dp.toPx(),
-                center = androidx.compose.ui.geometry.Offset(x, y)
-            )
-            drawCircle(
-                color = Color.White,
-                radius = 2.dp.toPx(),
-                center = androidx.compose.ui.geometry.Offset(x, y)
-            )
+            val barCount = data.size
+            val barWidth = width / (barCount * 1.5f)
+            val spacing = if (barCount > 1) (width - (barCount * barWidth)) / (barCount - 1) else 0f
+
+            data.forEachIndexed { index, (value, color) ->
+                val x = index * (barWidth + spacing)
+                val barHeight = value * height * 0.9f // Padding top
+
+                drawRoundRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(color, color.copy(alpha = 0.7f))
+                    ),
+                    topLeft = androidx.compose.ui.geometry.Offset(x, height - barHeight),
+                    size = androidx.compose.ui.geometry.Size(barWidth, barHeight),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx())
+                )
+            }
         }
     }
 }
@@ -293,6 +298,12 @@ fun CategoryLegendItem(label: String, color: Color) {
                 .background(color, RoundedCornerShape(2.dp))
         )
         Spacer(modifier = Modifier.width(4.dp))
-        Text(text = label, fontSize = 12.sp, color = Color.Gray)
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            color = Color.Gray,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
