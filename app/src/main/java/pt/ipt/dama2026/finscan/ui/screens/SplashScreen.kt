@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,11 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.stringResource
 import pt.ipt.dama2026.finscan.R
-import pt.ipt.dama2026.finscan.ui.theme.AmberAlert
-import pt.ipt.dama2026.finscan.ui.theme.EmeraldGreen
-import pt.ipt.dama2026.finscan.ui.theme.IndigoTechnological
-import pt.ipt.dama2026.finscan.ui.theme.OffWhite
-import pt.ipt.dama2026.finscan.ui.theme.SlateDark
+import pt.ipt.dama2026.finscan.ui.theme.*
 
 @Composable
 fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
@@ -57,7 +52,7 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
                 brush = Brush.verticalGradient(
                     colors = listOf(
                         OffWhite,
-                        Color(0xFFE0E7FF)
+                        SplashGradientEnd
                     )
                 )
             )
@@ -99,7 +94,7 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
             Text(
                 text = stringResource(R.string.splash_tag_line),
                 fontSize = 16.sp,
-                color = Color(0xFF64748B),
+                color = SplashTaglineColor,
                 modifier = Modifier.offset(y = 10.dp)
             )
 
@@ -111,7 +106,7 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
             Text(
                 text = stringResource(R.string.splash_loading_text),
                 fontSize = 14.sp,
-                color = Color(0xFF94A3B8),
+                color = SplashLoadingTextColor,
                 modifier = Modifier.offset(y = 15.dp)
             )
         }
