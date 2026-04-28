@@ -1,7 +1,12 @@
 package pt.ipt.dama2026.finscan.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -10,19 +15,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.text.SimpleDateFormat
-import java.util.*
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import pt.ipt.dama2026.finscan.R
 import pt.ipt.dama2026.finscan.ui.theme.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Class to define the bottom navbar routes, icons and text.
@@ -43,27 +49,40 @@ sealed class BottomNavItem(val route: String, val icon: ImageVector, val labelRe
 fun MainScreen() {
     // object to control what item is selected (nav item)
     var selectedItem by remember { mutableIntStateOf(0) }
-    val items = listOf(
-        BottomNavItem.Home,
-        BottomNavItem.Receipts,
-        BottomNavItem.Scan,
-        BottomNavItem.Reports,
-        BottomNavItem.Settings,
-    )
+    
+    // Remember items to avoid recreating list on every recomposition
+    val items = remember {
+        listOf(
+            BottomNavItem.Home,
+            BottomNavItem.Receipts,
+            BottomNavItem.Scan,
+            BottomNavItem.Reports,
+            BottomNavItem.Settings,
+        )
+    }
 
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                tonalElevation = 8.dp
+            Surface(
+                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 8.dp,
+                shadowElevation = 16.dp
             ) {
-                items.forEachIndexed { index, item ->
+                NavigationBar(
+                    containerColor = Color.Transparent,
+                ) {
+                    items.forEachIndexed { index, item ->
                     val label = stringResource(id = item.labelRes)
                     NavigationBarItem(
                         icon = { Icon(item.icon, contentDescription = label) },
                         label = { Text(label) },
                         selected = selectedItem == index,
-                        onClick = { selectedItem = index },
+                        onClick = { 
+                            if (selectedItem != index) {
+                                selectedItem = index 
+                            }
+                        },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = IndigoTechnological,
                             selectedTextColor = IndigoTechnological,
@@ -75,23 +94,63 @@ fun MainScreen() {
                 }
             }
         }
+    }
     ) { paddingValues ->
-        // Function responsible to redirect to the different's screens
-        // TODO: Change in PROD
+        // Use AnimatedContent for smoother transitions between screens
         Box(modifier = Modifier.padding(paddingValues)) {
-            when (selectedItem) {
-                0 -> HomeScreen()
-                1 -> null
-                2 -> null
-                3 -> null
-                4 -> null
+            AnimatedContent(
+                targetState = selectedItem,
+                transitionSpec = {
+                    fadeIn() togetherWith fadeOut()
+                },
+                label = "ScreenTransition"
+            ) { targetIndex ->
+                when (targetIndex) {
+                    0 -> HomeScreen(onNavigateToSettings = { selectedItem = 4 })
+                    1 -> ReceiptsScreen()
+                    2 -> ScanScreen()
+                    3 -> ReportsScreen()
+                    4 -> SettingsScreen()
+                }
             }
         }
     }
 }
 
 @Composable
-fun HomeScreen() {
+fun ReceiptsScreen() {
+    PlaceholderScreen("Receipts Screen")
+}
+
+@Composable
+fun ScanScreen() {
+    PlaceholderScreen("Scan Screen")
+}
+
+@Composable
+fun ReportsScreen() {
+    PlaceholderScreen("Reports Screen")
+}
+
+@Composable
+fun PlaceholderScreen(title: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(OffWhite),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = title,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = SlateDark
+        )
+    }
+}
+
+@Composable
+fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
     val userName = "Costa" // TODO: Change in PROD
     val currentDate = remember { 
         SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()) 
@@ -127,7 +186,9 @@ fun HomeScreen() {
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .background(IndigoTechnological.copy(alpha = 0.1f), RoundedCornerShape(24.dp)),
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(IndigoTechnological.copy(alpha = 0.1f))
+                    .clickable { onNavigateToSettings() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Default.Person, contentDescription = "Profile", tint = IndigoTechnological)
@@ -197,7 +258,6 @@ fun HomeScreen() {
                     .padding(16.dp)
             ) {
                 // Simple Bar Chart using Canvas
-                // TODO: Remove in PROD
                 val chartData = listOf(
                     0.6f to EmeraldGreen,
                     0.4f to IndigoTechnological,
@@ -220,7 +280,6 @@ fun HomeScreen() {
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    //TODO: Remove in PROD
                     CategoryLegendItem("Entertainment", EmeraldGreen)
                     CategoryLegendItem("Restaurant", IndigoTechnological)
                     CategoryLegendItem("University", AmberAlert)
@@ -245,7 +304,6 @@ fun BarChartPlaceholder(
     data: List<Pair<Float, Color>>,
     modifier: Modifier = Modifier
 ) {
-    // Default values incrementing by 25%
     val labels = listOf("100%", "75%", "50%", "25%", "0%")
 
     Row(modifier = modifier) {
