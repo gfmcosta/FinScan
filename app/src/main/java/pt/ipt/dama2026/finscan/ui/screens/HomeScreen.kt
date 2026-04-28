@@ -86,8 +86,8 @@ fun MainScreen() {
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = IndigoTechnological,
                             selectedTextColor = IndigoTechnological,
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray,
+                            unselectedIconColor = HomeNavBarGrey,
+                            unselectedTextColor = HomeNavBarGrey,
                             indicatorColor = IndigoTechnological.copy(alpha = 0.1f)
                         )
                     )
@@ -179,7 +179,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                 Text(
                     text = currentDate,
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    color = HomeCategoryTextGrey
                 )
             }
             // User Avatar placeholder
@@ -210,7 +210,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                     .fillMaxSize()
                     .background(
                         brush = Brush.horizontalGradient(
-                            colors = listOf(IndigoTechnological, Color(0xFF818CF8))
+                            colors = listOf(IndigoTechnological, HomeMonthlyCardGradientEnd)
                         )
                     )
                     .padding(24.dp),
@@ -319,7 +319,7 @@ fun BarChartPlaceholder(
                 Text(
                     text = label,
                     fontSize = 10.sp,
-                    color = Color.Gray
+                    color = HomeBarChartGrey
                 )
             }
         }
@@ -368,7 +368,7 @@ fun CategoryLegendItem(label: String, color: Color) {
         Text(
             text = label,
             fontSize = 12.sp,
-            color = Color.Gray,
+            color = HomeCategoryTextGrey,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

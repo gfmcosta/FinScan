@@ -15,8 +15,7 @@
     <string name="settings_profile_label">Profile</string>
     <string name="settings_notifications_label">Notifications</string>
     <string name="settings_general_label">General</string>
-    <string name="language_label">Language</string>
-    <string name="logout_label">Logout</string>
-
-
+    <string name="settings_language_label">Language</string>
+    <string name="settings_logout_label">Logout</string>
+    <string name="settings_about_us_label">About Us</string>
 </resources>

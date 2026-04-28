@@ -55,14 +55,14 @@ fun SettingsScreen() {
                 modifier = Modifier
                     .size(60.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray),
+                    .background(SettingsProfilePlaceholderColor),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     Icons.Default.Person,
                     contentDescription = null,
                     modifier = Modifier.size(32.dp),
-                    tint = Color.White
+                    tint = SettingsIconTintColor
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
@@ -77,13 +77,13 @@ fun SettingsScreen() {
                 Text(
                     text = stringResource(R.string.settings_edit_user_label),
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    color = SettingsSubtextColor
                 )
             }
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = Color.Gray
+                tint = SettingsSubtextColor
             )
         }
 
@@ -92,7 +92,7 @@ fun SettingsScreen() {
         // Dark Mode
         SettingsSwitchItem(
             icon = Icons.Default.NightsStay,
-            iconContainerColor = Color(0xFF374151),
+            iconContainerColor = SettingsDarkModeColor,
             label = stringResource(R.string.settings_dark_mode),
             initialValue = false
         )
@@ -100,19 +100,19 @@ fun SettingsScreen() {
         SettingsSectionHeader(stringResource(R.string.settings_profile_label))
         SettingsClickableItem(
             icon = Icons.Default.Person,
-            iconContainerColor = Color(0xFFF97316),
+            iconContainerColor = SettingsEditProfileColor,
             label = stringResource(R.string.settings_edit_profile)
         )
         SettingsClickableItem(
             icon = Icons.Default.Lock,
-            iconContainerColor = Color(0xFF3B82F6),
+            iconContainerColor = SettingsChangePasswordColor,
             label = stringResource(R.string.settings_change_password)
         )
 
         SettingsSectionHeader(stringResource(R.string.settings_notifications_label))
         SettingsSwitchItem(
             icon = Icons.Default.Notifications,
-            iconContainerColor = Color(0xFF22C55E),
+            iconContainerColor = SettingsNotificationsColor,
             label = stringResource(R.string.settings_notifications_label),
             initialValue = false
         )
@@ -120,13 +120,18 @@ fun SettingsScreen() {
         SettingsSectionHeader(stringResource(R.string.settings_general_label))
         SettingsClickableItem(
             icon = Icons.Default.Public,
-            iconContainerColor = Color(0xFF6366F1),
-            label = stringResource(R.string.language_label)
+            iconContainerColor = SettingsLanguageColor,
+            label = stringResource(R.string.settings_language_label)
         )
         SettingsClickableItem(
             icon = Icons.AutoMirrored.Filled.Logout,
-            iconContainerColor = Color(0xFFEF4444),
-            label = stringResource(R.string.logout_label)
+            iconContainerColor = SettingsLogoutColor,
+            label = stringResource(R.string.settings_logout_label)
+        )
+        SettingsClickableItem(
+            icon = Icons.Default.Info,
+            iconContainerColor = SettingsAboutUsColor,
+            label = stringResource(R.string.settings_about_us_label)
         )
     }
 }
@@ -167,7 +172,7 @@ fun SettingsClickableItem(
                 icon,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = Color.White
+                tint = SettingsIconTintColor
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
@@ -180,7 +185,7 @@ fun SettingsClickableItem(
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = Color.LightGray
+            tint = SettingsArrowColor
         )
     }
 }
@@ -210,7 +215,7 @@ fun SettingsSwitchItem(
                 icon,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = Color.White
+                tint = SettingsIconTintColor
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
@@ -224,10 +229,10 @@ fun SettingsSwitchItem(
             checked = checked,
             onCheckedChange = { checked = it },
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
+                checkedThumbColor = SettingsIconTintColor,
                 checkedTrackColor = EmeraldGreen,
-                uncheckedThumbColor = Color.White,
-                uncheckedTrackColor = Color.LightGray,
+                uncheckedThumbColor = SettingsIconTintColor,
+                uncheckedTrackColor = SettingsArrowColor,
                 uncheckedBorderColor = Color.Transparent
             )
         )
