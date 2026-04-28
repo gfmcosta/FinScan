@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
+import androidx.compose.ui.res.stringResource
 import pt.ipt.dama2026.finscan.R
 import pt.ipt.dama2026.finscan.ui.theme.*
 
@@ -67,7 +68,7 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Logo animado
+            // Animated Logo
             AnimatedLogo()
 
             // Blank Space
@@ -91,7 +92,7 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
 
             // Tagline
             Text(
-                text = "Digitaliza os teus recibos com facilidade",
+                text = stringResource(R.string.splash_tag_line),
                 fontSize = 16.sp,
                 color = SplashTaglineColor,
                 modifier = Modifier.offset(y = 10.dp)
@@ -101,16 +102,16 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
             Box(modifier = Modifier.size(40.dp))
             LoadingDots()
 
-            // Texto de carregamento
+            // Loading text
             Text(
-                text = "A preparar...",
+                text = stringResource(R.string.splash_loading_text),
                 fontSize = 14.sp,
                 color = SplashLoadingTextColor,
                 modifier = Modifier.offset(y = 15.dp)
             )
         }
 
-        // Barra de progresso no fundo
+        // Progress bar in footer
         ProgressBar(modifier = Modifier.align(Alignment.BottomCenter))
     }
 }
@@ -170,7 +171,7 @@ fun FloatingParticles() {
         label = "particle3"
     )
 
-    // Partícula 1 - Indigo
+    // Particle 1 - Indigo
     Box(
         modifier = Modifier
             .offset(y = particle1Offset.dp)
@@ -182,7 +183,7 @@ fun FloatingParticles() {
             )
     )
 
-    // Partícula 2 - Verde
+    // Particle 2 - Green
     Box(
         modifier = Modifier
             .offset(y = particle2Offset.dp)
@@ -194,7 +195,7 @@ fun FloatingParticles() {
             )
     )
 
-    // Partícula 3 - Âmbar
+    // Particle 3 - Amber
     Box(
         modifier = Modifier
             .offset(y = particle3Offset.dp)
@@ -304,6 +305,7 @@ fun LoadingDots() {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Dot 1
         Box(
             modifier = Modifier
                 .size(8.dp)
@@ -311,6 +313,8 @@ fun LoadingDots() {
                 .background(IndigoTechnological)
                 .offset(y = dot1Offset.dp)
         )
+
+        // Dot 1
         Box(
             modifier = Modifier
                 .size(8.dp)
@@ -318,6 +322,8 @@ fun LoadingDots() {
                 .background(IndigoTechnological)
                 .offset(y = dot2Offset.dp)
         )
+
+        // Dot 3
         Box(
             modifier = Modifier
                 .size(8.dp)

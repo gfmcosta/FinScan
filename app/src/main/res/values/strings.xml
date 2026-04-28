@@ -8,6 +8,8 @@
     <string name="home_monthly_spent_title">This month you have already spent</string>
     <string name="home_category_spent_title">Top 5 most spent categories</string>
     <string name="home_hi_title">Hi, </string>
+    <string name="splash_tag_line">Scan your receipts easily</string>
+    <string name="splash_loading_text">Preparing…</string>
     <string name="settings_edit_user_label">Edit personal details</string>
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_edit_profile">Edit Profile</string>
