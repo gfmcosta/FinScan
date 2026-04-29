@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,8 +52,8 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        OffWhite,
-                        SplashGradientEnd
+                        MaterialTheme.colorScheme.background,
+                        if (isDarkTheme()) SplashDarkGradientEnd else SplashGradientEnd
                     )
                 )
             )
@@ -79,7 +80,7 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
                 text = "Fin",
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
-                color = SlateDark,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.offset(y = (-5).dp)
             )
             Text(
@@ -94,7 +95,7 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
             Text(
                 text = stringResource(R.string.splash_tag_line),
                 fontSize = 16.sp,
-                color = SplashTaglineColor,
+                color = getAdaptiveSubtext(),
                 modifier = Modifier.offset(y = 10.dp)
             )
 
@@ -106,7 +107,7 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
             Text(
                 text = stringResource(R.string.splash_loading_text),
                 fontSize = 14.sp,
-                color = SplashLoadingTextColor,
+                color = getAdaptiveSubtext(),
                 modifier = Modifier.offset(y = 15.dp)
             )
         }

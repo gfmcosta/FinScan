@@ -137,14 +137,14 @@ fun PlaceholderScreen(title: String) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(OffWhite),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = title,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = SlateDark
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
@@ -160,7 +160,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(OffWhite)
+            .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
     ) {
         // Header
@@ -174,12 +174,12 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                     text = stringResource(R.string.home_hi_title) + userName,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = SlateDark
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = currentDate,
                     fontSize = 14.sp,
-                    color = HomeCategoryTextGrey
+                    color = getAdaptiveSubtext()
                 )
             }
             // User Avatar placeholder
@@ -187,11 +187,11 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(24.dp))
-                    .background(IndigoTechnological.copy(alpha = 0.1f))
+                    .background(SettingsProfilePlaceholderColor)
                     .clickable { onNavigateToSettings() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Person, contentDescription = "Profile", tint = IndigoTechnological)
+                Icon(Icons.Default.Person, contentDescription = "Profile", tint = SettingsIconTintColor)
             }
         }
 
@@ -239,7 +239,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
             text = stringResource(R.string.home_category_spent_title),
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
-            color = SlateDark
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -249,7 +249,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                 .fillMaxWidth()
                 .weight(1f),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(
@@ -263,7 +263,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                     0.4f to IndigoTechnological,
                     0.8f to AmberAlert,
                     0.3f to Color.Magenta,
-                    0.5f to Color.Cyan
+                    0.5f to LightBlue
                 )
                 BarChartPlaceholder(
                     data = chartData,
@@ -284,7 +284,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                     CategoryLegendItem("Restaurant", IndigoTechnological)
                     CategoryLegendItem("University", AmberAlert)
                     CategoryLegendItem("Car - Gasoline", Color.Magenta)
-                    CategoryLegendItem("Car - Tolls", Color.Cyan)
+                    CategoryLegendItem("Car - Tolls", LightBlue)
                 }
             }
         }
@@ -319,7 +319,7 @@ fun BarChartPlaceholder(
                 Text(
                     text = label,
                     fontSize = 10.sp,
-                    color = HomeBarChartGrey
+                    color = getAdaptiveSubtext()
                 )
             }
         }
@@ -368,7 +368,7 @@ fun CategoryLegendItem(label: String, color: Color) {
         Text(
             text = label,
             fontSize = 12.sp,
-            color = HomeCategoryTextGrey,
+            color = getAdaptiveSubtext(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

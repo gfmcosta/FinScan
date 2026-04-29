@@ -17,7 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import kotlinx.coroutines.launch
+import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,10 +32,18 @@ import pt.ipt.dama2026.finscan.R
 
 @Composable
 fun SettingsScreen() {
+    // Instance LocalContext storage
+    val context = LocalContext.current
+    val settingsManager = remember { SettingsManager(context) }
+    // get darkMode key from shared preferences or use the preference from the system
+    val isDarkModeStored by settingsManager.isDarkMode.collectAsState(initial = null)
+    val currentDarkMode = isDarkModeStored ?: isSystemInDarkTheme()
+    val scope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(OffWhite)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
@@ -39,7 +51,7 @@ fun SettingsScreen() {
             text = stringResource(R.string.settings_label),
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = SlateDark,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
@@ -72,18 +84,18 @@ fun SettingsScreen() {
                     text = "Costa",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = SlateDark
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = stringResource(R.string.settings_edit_user_label),
                     fontSize = 14.sp,
-                    color = SettingsSubtextColor
+                    color = getAdaptiveSubtext()
                 )
             }
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = SettingsSubtextColor
+                tint = getAdaptiveControlColor()
             )
         }
 
@@ -94,7 +106,12 @@ fun SettingsScreen() {
             icon = Icons.Default.NightsStay,
             iconContainerColor = SettingsDarkModeColor,
             label = stringResource(R.string.settings_dark_mode),
-            initialValue = false
+            initialValue = currentDarkMode,
+            onCheckedChange = { enabled ->
+                scope.launch {
+                    settingsManager.setDarkMode(enabled)
+                }
+            }
         )
 
         SettingsSectionHeader(stringResource(R.string.settings_profile_label))
@@ -142,7 +159,7 @@ fun SettingsSectionHeader(title: String) {
         text = title,
         fontSize = 16.sp,
         fontWeight = FontWeight.SemiBold,
-        color = SlateDark,
+        color = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
     )
 }
@@ -180,12 +197,12 @@ fun SettingsClickableItem(
             text = label,
             modifier = Modifier.weight(1f),
             fontSize = 16.sp,
-            color = SlateDark
+            color = MaterialTheme.colorScheme.onBackground
         )
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = SettingsArrowColor
+            tint = getAdaptiveControlColor()
         )
     }
 }
@@ -195,9 +212,9 @@ fun SettingsSwitchItem(
     icon: ImageVector,
     iconContainerColor: Color,
     label: String,
-    initialValue: Boolean
+    initialValue: Boolean,
+    onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    var checked by remember { mutableStateOf(initialValue) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -223,16 +240,16 @@ fun SettingsSwitchItem(
             text = label,
             modifier = Modifier.weight(1f),
             fontSize = 16.sp,
-            color = SlateDark
+            color = MaterialTheme.colorScheme.onBackground
         )
         Switch(
-            checked = checked,
-            onCheckedChange = { checked = it },
+            checked = initialValue,
+            onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = SettingsIconTintColor,
                 checkedTrackColor = EmeraldGreen,
                 uncheckedThumbColor = SettingsIconTintColor,
-                uncheckedTrackColor = SettingsArrowColor,
+                uncheckedTrackColor = getAdaptiveControlColor(),
                 uncheckedBorderColor = Color.Transparent
             )
         )
