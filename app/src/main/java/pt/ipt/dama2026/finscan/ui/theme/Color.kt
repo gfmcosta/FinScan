@@ -1,6 +1,9 @@
 package pt.ipt.dama2026.finscan.ui.theme
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 
 // Light Palette
 val IndigoTechnological = Color(0xFF6366F1)      // Primary
@@ -27,14 +30,23 @@ val SettingsProfilePlaceholderColor = Color.LightGray
 val SettingsSubtextColor = Color.Gray
 val SettingsArrowColor = Color.LightGray
 val SettingsIconTintColor = Color.White
+val SettingsArrowDarkColor = Color(0xFF94A3B8)
 
 // Home Screen Colors
 val HomeMonthlyCardGradientEnd = Color(0xFF818CF8)
-val HomeBarChartGrey = Color.Gray
-val HomeCategoryTextGrey = Color.Gray
 val HomeNavBarGrey = Color.Gray
+val LightBlue = Color(0xFF00BCD4)
 
 // Splash Screen Colors
 val SplashGradientEnd = Color(0xFFE0E7FF)
-val SplashTaglineColor = Color(0xFF64748B)
-val SplashLoadingTextColor = Color(0xFF94A3B8)
+val SplashDarkGradientEnd = Color(0xFF1E293B)
+
+// Helper to check if the current theme is dark based on background luminance
+@Composable
+fun isDarkTheme(): Boolean = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
+// Dynamic Colors Helpers
+@Composable
+fun getAdaptiveSubtext() = if (isDarkTheme()) Color.LightGray else SettingsSubtextColor
+@Composable
+fun getAdaptiveControlColor() = if (isDarkTheme()) SettingsArrowDarkColor else SettingsArrowColor
