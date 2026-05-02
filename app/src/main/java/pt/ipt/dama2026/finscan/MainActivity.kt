@@ -1,16 +1,19 @@
 package pt.ipt.dama2026.finscan
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
 import pt.ipt.dama2026.finscan.ui.screens.SplashScreen
@@ -26,13 +29,57 @@ class MainActivity : ComponentActivity() {
         val settingsManager = SettingsManager(this)
 
         setContent {
-            // get the darkMode setting
+            // Observe settings - start with null to detect when DataStore has finished reading
             val isDarkModeStored by settingsManager.isDarkMode.collectAsState(initial = null)
-            // if this setting doesn't exist it will use the system preference
-            val useDarkMode = isDarkModeStored ?: isSystemInDarkTheme()
+            val languageStored by settingsManager.language.collectAsState(initial = null)
+            
+            val systemInDarkTheme = isSystemInDarkTheme()
 
-            FinScanTheme(darkTheme = useDarkMode) {
-                MainApp()
+            // Only render when we have the preferred language to avoid language flicker
+            if (languageStored != null) {
+                val currentLanguage = languageStored!!
+                val currentConfig = LocalConfiguration.current
+                val context = LocalContext.current
+                
+                // Force the configuration and context to use the selected language
+                val configAndContext = remember(currentLanguage, currentConfig) {
+                    val locale = java.util.Locale.forLanguageTag(currentLanguage)
+                    java.util.Locale.setDefault(locale)
+                    
+                    val config = android.content.res.Configuration(currentConfig)
+                    config.setLocale(locale)
+                    
+                    // Create a context wrapper with the new configuration
+                    val newContext = context.createConfigurationContext(config)
+                    Pair(config, newContext)
+                }
+
+                val configuration = configAndContext.first
+                val wrappedContext = configAndContext.second
+
+                // Initialize/Persist settings if missing
+                LaunchedEffect(Unit) {
+                    settingsManager.setDarkModeIfMissing(systemInDarkTheme)
+                    settingsManager.setLanguageIfMissing(currentLanguage)
+                }
+
+                // Also update the system resources in the background
+                LaunchedEffect(currentLanguage) {
+                    settingsManager.updateResourceLocale(currentLanguage)
+                }
+
+                // Determine which theme to use
+                val useDarkMode = isDarkModeStored ?: systemInDarkTheme
+
+                // Wrap everything with updated configuration and context
+                CompositionLocalProvider(
+                    LocalConfiguration provides configuration,
+                    LocalContext provides wrappedContext
+                ) {
+                    FinScanTheme(darkTheme = useDarkMode) {
+                        MainApp()
+                    }
+                }
             }
         }
     }

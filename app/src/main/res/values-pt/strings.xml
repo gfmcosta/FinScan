@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">FinScan</string>
+    <string name="home_label">Ínicio</string>
+    <string name="receipts_label">Receitas</string>
+    <string name="scan_label">Ler</string>
+    <string name="reports_label">Relatórios</string>
+    <string name="settings_label">Definições</string>
+    <string name="home_monthly_spent_title">Este mês já gastou</string>
+    <string name="home_category_spent_title">Top 5 categorias mais gastas</string>
+    <string name="home_hi_title">Olá, </string>
+    <string name="splash_tag_line">Lê as tuas receitas facilmente</string>
+    <string name="splash_loading_text">Preparando…</string>
+    <string name="settings_edit_user_label">Editar informações pessoais</string>
+    <string name="settings_dark_mode">Modo Escuro</string>
+    <string name="settings_edit_profile">Editar Perfil</string>
+    <string name="settings_change_password">Alterar Palavra-passe</string>
+    <string name="settings_profile_label">Perfil</string>
+    <string name="settings_notifications_label">Notificações</string>
+    <string name="settings_general_label">Geral</string>
+    <string name="settings_language_label">Linguagem</string>
+    <string name="settings_logout_label">Terminar Sessão</string>
+    <string name="settings_about_us_label">Sobre nós</string>
+</resources>
