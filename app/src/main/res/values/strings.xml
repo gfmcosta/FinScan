@@ -19,5 +19,5 @@
     <string name="settings_general_label">General</string>
     <string name="settings_language_label">Language</string>
     <string name="settings_logout_label">Logout</string>
-    <string name="settings_about_us_label">About Us</string>
+    <string name="settings_about_us_label">About us</string>
 </resources>

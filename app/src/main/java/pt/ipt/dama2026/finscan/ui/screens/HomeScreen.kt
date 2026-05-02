@@ -4,9 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -161,6 +159,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
         // Header
@@ -216,17 +215,21 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                     .padding(24.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
-                Column {
+                Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = stringResource(R.string.home_monthly_spent_title),
                         color = Color.White.copy(alpha = 0.8f),
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = "$monthlySpent€",
                         color = Color.White,
                         fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -247,7 +250,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .height(450.dp),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -280,11 +283,12 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    CategoryLegendItem("Entertainment", EmeraldGreen)
-                    CategoryLegendItem("Restaurant", IndigoTechnological)
-                    CategoryLegendItem("University", AmberAlert)
-                    CategoryLegendItem("Car - Gasoline", Color.Magenta)
-                    CategoryLegendItem("Car - Tolls", LightBlue)
+                    // TODO: Change in PROD
+                    CategoryLegendItem("Entertainment", "120,50", EmeraldGreen)
+                    CategoryLegendItem("Restaurant", "85,20", IndigoTechnological)
+                    CategoryLegendItem("University", "200,00", AmberAlert)
+                    CategoryLegendItem("Car - Gasoline", "35,00", Color.Magenta)
+                    CategoryLegendItem("Car - Tolls", "9,55", LightBlue)
                 }
             }
         }
@@ -357,7 +361,7 @@ fun BarChartPlaceholder(
 }
 
 @Composable
-fun CategoryLegendItem(label: String, color: Color) {
+fun CategoryLegendItem(label: String, amount: String, color: Color) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
@@ -366,7 +370,7 @@ fun CategoryLegendItem(label: String, color: Color) {
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
-            text = label,
+            text = "$label ($amount€)",
             fontSize = 12.sp,
             color = getAdaptiveSubtext(),
             maxLines = 1,
