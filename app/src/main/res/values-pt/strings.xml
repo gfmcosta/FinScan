@@ -20,4 +20,8 @@
     <string name="settings_language_label">Linguagem</string>
     <string name="settings_logout_label">Terminar Sessão</string>
     <string name="settings_about_us_label">Sobre nós</string>
+    <string name="language_back_label">Voltar</string>
+    <string name="language_portuguese_label">Português</string>
+    <string name="language_english_label">Inglês</string>
+
 </resources>
