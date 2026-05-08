@@ -20,4 +20,7 @@
     <string name="settings_language_label">Language</string>
     <string name="settings_logout_label">Logout</string>
     <string name="settings_about_us_label">About us</string>
+    <string name="language_back_label">Back</string>
+    <string name="language_portuguese_label">Portuguese</string>
+    <string name="language_english_label">English</string>
 </resources>

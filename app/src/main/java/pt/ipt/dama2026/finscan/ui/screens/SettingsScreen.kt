@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,8 +36,32 @@ fun SettingsScreen() {
     val settingsManager = remember { SettingsManager(context) }
     // get darkMode key from shared preferences or use the preference from the system
     val isDarkModeStored by settingsManager.isDarkMode.collectAsState(initial = null)
-    val currentDarkMode = isDarkModeStored ?: isSystemInDarkTheme()
+    val currentDarkMode = isDarkModeStored ?: false
     val scope = rememberCoroutineScope()
+
+    // Navigation state
+    var currentScreen by remember { mutableStateOf("settings") }
+
+    when (currentScreen) {
+        "settings" -> SettingsMainContent(
+            currentDarkMode = currentDarkMode,
+            settingsManager = settingsManager,
+            scope = scope,
+            onNavigateToLanguage = { currentScreen = "language" }
+        )
+        "language" -> LanguageSelectionScreen(
+            onBack = { currentScreen = "settings" }
+        )
+    }
+}
+
+@Composable
+fun SettingsMainContent(
+    currentDarkMode: Boolean,
+    settingsManager: SettingsManager,
+    scope: kotlinx.coroutines.CoroutineScope,
+    onNavigateToLanguage: () -> Unit = {}
+) {
 
     Column(
         modifier = Modifier
@@ -138,7 +161,8 @@ fun SettingsScreen() {
         SettingsClickableItem(
             icon = Icons.Default.Public,
             iconContainerColor = SettingsLanguageColor,
-            label = stringResource(R.string.settings_language_label)
+            label = stringResource(R.string.settings_language_label),
+            onClick = onNavigateToLanguage
         )
         SettingsClickableItem(
             icon = Icons.AutoMirrored.Filled.Logout,
@@ -259,7 +283,7 @@ fun SettingsSwitchItem(
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    FinScanTheme {
+    FinScanTheme(darkTheme = false) {
         SettingsScreen()
     }
 }
