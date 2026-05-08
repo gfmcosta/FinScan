@@ -1,6 +1,5 @@
 package pt.ipt.dama2026.finscan.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -35,7 +34,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun FinScanTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

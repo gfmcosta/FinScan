@@ -26,7 +26,7 @@ class SettingsManager(private val context: Context) {
         val LANGUAGE_KEY = stringPreferencesKey("language")
     }
 
-    // Read theme preference
+    // Read theme preference (default to false/light mode if not set)
     val isDarkMode: Flow<Boolean?> = context.dataStore.data
         .catch { exception ->
             if (exception is IOException) {
@@ -36,7 +36,7 @@ class SettingsManager(private val context: Context) {
             }
         }
         .map { preferences ->
-            preferences[DARK_MODE_KEY]
+            preferences[DARK_MODE_KEY] ?: false
         }
 
     // Read language preference (returns system default if not set)
@@ -59,17 +59,6 @@ class SettingsManager(private val context: Context) {
     suspend fun setDarkMode(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[DARK_MODE_KEY] = enabled
-        }
-    }
-
-    /**
-     * Persists dark mode only if no preference is currently stored.
-     */
-    suspend fun setDarkModeIfMissing(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
-            if (preferences[DARK_MODE_KEY] == null) {
-                preferences[DARK_MODE_KEY] = enabled
-            }
         }
     }
 

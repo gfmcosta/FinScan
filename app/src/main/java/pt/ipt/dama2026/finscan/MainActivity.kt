@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -32,12 +31,11 @@ class MainActivity : ComponentActivity() {
             // Observe settings - start with null to detect when DataStore has finished reading
             val isDarkModeStored by settingsManager.isDarkMode.collectAsState(initial = null)
             val languageStored by settingsManager.language.collectAsState(initial = null)
-            
-            val systemInDarkTheme = isSystemInDarkTheme()
 
-            // Only render when we have the preferred language to avoid language flicker
-            if (languageStored != null) {
+            // Only render when we have BOTH language and theme to avoid any flicker
+            if (languageStored != null && isDarkModeStored != null) {
                 val currentLanguage = languageStored!!
+                val useDarkMode = isDarkModeStored!!
                 val currentConfig = LocalConfiguration.current
                 val context = LocalContext.current
                 
@@ -57,9 +55,8 @@ class MainActivity : ComponentActivity() {
                 val configuration = configAndContext.first
                 val wrappedContext = configAndContext.second
 
-                // Initialize/Persist settings if missing
+                // Initialize language if missing (theme is now loaded from DataStore)
                 LaunchedEffect(Unit) {
-                    settingsManager.setDarkModeIfMissing(systemInDarkTheme)
                     settingsManager.setLanguageIfMissing(currentLanguage)
                 }
 
@@ -67,9 +64,6 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(currentLanguage) {
                     settingsManager.updateResourceLocale(currentLanguage)
                 }
-
-                // Determine which theme to use
-                val useDarkMode = isDarkModeStored ?: systemInDarkTheme
 
                 // Wrap everything with updated configuration and context
                 CompositionLocalProvider(
@@ -103,7 +97,7 @@ fun MainApp() {
 @Preview(showBackground = true)
 @Composable
 fun SplashScreenPreview() {
-    FinScanTheme {
+    FinScanTheme(darkTheme = false) {
         SplashScreen()
     }
 }

@@ -298,7 +298,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    FinScanTheme {
+    FinScanTheme(darkTheme = false) {
         MainScreen()
     }
 }

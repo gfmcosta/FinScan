@@ -259,7 +259,7 @@ fun SettingsSwitchItem(
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    FinScanTheme {
+    FinScanTheme(darkTheme = false) {
         SettingsScreen()
     }
 }
