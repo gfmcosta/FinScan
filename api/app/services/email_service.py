@@ -28,26 +28,31 @@ def send_reset_code_email(email_to: str, code: str):
     """
     message.attach(MIMEText(body, "html"))
 
+    # Brevo funciona melhor na porta 587 com STARTTLS
     try:
-        # Tenta usar o porto 587 com STARTTLS (mais comum)
-        print(f"Tentando enviar e-mail para {email_to} via {settings.smtp_server}:{settings.smtp_port}...")
-        server = smtplib.SMTP(settings.smtp_server, settings.smtp_port, timeout=15)
-        server.starttls(context=ssl.create_default_context())
-        server.login(settings.smtp_user, settings.smtp_password)
-        server.send_message(message)
-        server.quit()
-        print(f"Sucesso: E-mail enviado para {email_to}")
+        print(f"Railway: Tentando enviar para {email_to} via {settings.smtp_server}:587")
+        # Usamos o contexto SSL padrão
+        context = ssl.create_default_context()
+
+        with smtplib.SMTP(settings.smtp_server, 587, timeout=20) as server:
+            server.ehlo()
+            server.starttls(context=context)
+            server.ehlo()
+            server.login(settings.smtp_user, settings.smtp_password)
+            server.send_message(message)
+            print(f"Sucesso absoluto no envio para {email_to}")
         return True
     except Exception as e:
-        print(f"Erro crítico no envio de e-mail: {str(e)}")
-        # Tenta fallback para porto 465 se o 587 falhar (comum em bloqueios de cloud)
+        print(f"Erro no envio via 587: {str(e)}")
+        # Última tentativa na porta 2525 (Brevo suporta esta porta alternativa para evitar bloqueios)
         try:
-            print("Tentando fallback via SSL (Porto 465)...")
-            with smtplib.SMTP_SSL(settings.smtp_server, 465, timeout=15) as server:
+            print(f"Tentando porta alternativa 2525 para {email_to}...")
+            with smtplib.SMTP(settings.smtp_server, 2525, timeout=20) as server:
+                server.starttls(context=ssl.create_default_context())
                 server.login(settings.smtp_user, settings.smtp_password)
                 server.send_message(message)
-            print("Sucesso via Fallback SSL")
+                print(f"Sucesso via porta 2525")
             return True
         except Exception as e2:
-            print(f"Fallback também falhou: {str(e2)}")
+            print(f"Todas as tentativas falharam (587, 465, 2525). Erro final: {str(e2)}")
             return False
