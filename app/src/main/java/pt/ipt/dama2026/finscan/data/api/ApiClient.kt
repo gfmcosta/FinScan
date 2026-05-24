@@ -15,7 +15,7 @@ object ApiClient {
     // For local development with emulator: http://10.0.2.2:8000
     // For local development with real device: http://YOUR_IP:8000
     // For production: https://your-api-domain.com
-    private const val BASE_URL = "http://10.0.2.2:8000/api/v1/"
+    private const val BASE_URL = "https://finscan-production.up.railway.app/api/v1/"
 
     private var authManager: AuthManager? = null
     private var retrofit: Retrofit? = null

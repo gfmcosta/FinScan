@@ -13,6 +13,8 @@ data class LoginRequest(
 data class RegisterRequest(
     @SerializedName("username")
     val username: String,
+    @SerializedName("name")
+    val name: String,
     @SerializedName("email")
     val email: String,
     @SerializedName("password")
@@ -26,7 +28,9 @@ data class TokenResponse(
     @SerializedName("access_token")
     val accessToken: String,
     @SerializedName("token_type")
-    val tokenType: String = "bearer"
+    val tokenType: String = "bearer",
+    @SerializedName("name")
+    val name: String? = null
 )
 
 data class UserResponse(

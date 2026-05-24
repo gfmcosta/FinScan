@@ -24,15 +24,14 @@ class AuthService(private val context: Context) {
      */
     suspend fun login(username: String, password: String): Result<String> = withContext(Dispatchers.IO) {
         return@withContext try {
-            val request = LoginRequest(username, password)
-            val response = authApiService.login(request)
+            val response = authApiService.login(username, password)
 
             when {
                 response.isSuccessful && response.body() != null -> {
-                    val token = response.body()!!.accessToken
-                    // Guardar token
-                    authManager.saveToken(token, username)
-                    Result.Success(token)
+                    val tokenResponse = response.body()!!
+                    // Guardar token e nome
+                    authManager.saveToken(tokenResponse.accessToken, username, tokenResponse.name)
+                    Result.Success(tokenResponse.accessToken)
                 }
                 response.code() == 401 -> {
                     Result.Error("Invalid credentials")
@@ -59,12 +58,14 @@ class AuthService(private val context: Context) {
      */
     suspend fun register(
         username: String,
+        name: String,
         email: String,
         password: String
     ): Result<UserResponse> = withContext(Dispatchers.IO) {
         return@withContext try {
             val request = RegisterRequest(
                 username = username,
+                name = name,
                 email = email,
                 password = password,
                 role = "user"

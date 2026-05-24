@@ -4,13 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -86,28 +90,37 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainApp(authManager: AuthManager) {
-    val isLoggedIn by authManager.isLoggedIn.collectAsState(initial = false)
-    val showSplash = remember { mutableStateOf(!isLoggedIn) }
+    // Usamos null como estado inicial para saber quando o DataStore terminou de ler
+    val isLoggedIn by authManager.isLoggedIn.collectAsState(initial = null)
+    var splashFinished by remember { mutableStateOf(false) }
 
     when {
-        !isLoggedIn -> {
-            // Mostrar fluxo de autenticação
-            AuthNavigationFlow(
-                onAuthSuccess = {
-                    // Após login bem-sucedido, mostrar splash antes do app principal
-                    showSplash.value = true
-                }
-            )
+        // 1. Enquanto carrega o estado de autenticação, podemos mostrar um fundo vazio ou a splash
+        isLoggedIn == null -> {
+            Box(modifier = Modifier.fillMaxSize())
         }
-        showSplash.value -> {
+
+        // 2. Se estiver logado MAS a splash ainda não terminou, mostramos a splash
+        isLoggedIn == true && !splashFinished -> {
             SplashScreen(
                 onNavigateToHome = {
-                    showSplash.value = false
+                    splashFinished = true
                 }
             )
         }
+
+        // 3. Se não estiver logado, mostramos o fluxo de autenticação
+        isLoggedIn == false -> {
+            AuthNavigationFlow(
+                onAuthSuccess = {
+                    // O AuthManager irá atualizar o isLoggedIn para true,
+                    // o que ativará o branch acima (isLoggedIn == true && !splashFinished)
+                }
+            )
+        }
+
+        // 4. Se estiver logado E a splash já terminou, ecrã principal
         else -> {
-            // App main content
             MainScreen()
         }
     }

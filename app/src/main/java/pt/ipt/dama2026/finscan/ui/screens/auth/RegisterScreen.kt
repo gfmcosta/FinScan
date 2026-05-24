@@ -1,5 +1,6 @@
 package pt.ipt.dama2026.finscan.ui.screens.auth
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,14 +9,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,16 +23,30 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import org.json.JSONObject
 import pt.ipt.dama2026.finscan.R
 import pt.ipt.dama2026.finscan.ui.theme.*
+import pt.ipt.dama2026.finscan.ui.components.CustomToast
+import pt.ipt.dama2026.finscan.ui.components.ToastState
+import pt.ipt.dama2026.finscan.ui.components.ToastType
+import pt.ipt.dama2026.finscan.data.api.ApiClient
+import pt.ipt.dama2026.finscan.data.api.models.RegisterRequest
+import pt.ipt.dama2026.finscan.data.api.services.AuthApiService
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun RegisterScreen(
     onRegisterSuccess: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {}
 ) {
+    // Usar onNavigateToLogin em vez de onRegisterSuccess para ir para login
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    
     var username by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -41,22 +54,29 @@ fun RegisterScreen(
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var toastState by remember { mutableStateOf(ToastState()) }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp)
+            .statusBarsPadding()
     ) {
-        // Back Button
-        IconButton(
-            onClick = onNavigateToLogin,
-            enabled = !isLoading,
+        Column(
             modifier = Modifier
-                .align(Alignment.Start)
-                .padding(bottom = 8.dp)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp)
         ) {
+            // Back Button
+            IconButton(
+                onClick = onNavigateToLogin,
+                enabled = !isLoading,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .offset(x = (-12).dp) // Alinhar o ícone com o início do texto
+                    .padding(bottom = 8.dp)
+            ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = null,
@@ -112,6 +132,27 @@ fun RegisterScreen(
                 errorMessage = ""
             },
             label = { Text(stringResource(R.string.auth_username_hint)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp),
+            shape = RoundedCornerShape(12.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = IndigoTechnological,
+                focusedLabelColor = IndigoTechnological
+            ),
+            enabled = !isLoading
+        )
+
+        // Name TextField
+        OutlinedTextField(
+            value = name,
+            onValueChange = {
+                name = it
+                errorMessage = ""
+            },
+            label = { Text(stringResource(R.string.auth_name_hint)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp),
@@ -219,15 +260,53 @@ fun RegisterScreen(
         // Register Button
         Button(
             onClick = {
-                val validationError = validateRegisterForm(username, email, password, confirmPassword, context)
+                val validationError = validateRegisterForm(username, name, email, password, confirmPassword, context)
                 if (validationError == null) {
                     isLoading = true
                     errorMessage = ""
-                    // Aqui chamaria o AuthService.register()
-                    // Para demo, apenas faz navegação após 1s
-                    // Em produção, integrar com API
-                    onRegisterSuccess()
-                    isLoading = false
+                    
+                    scope.launch {
+                        try {
+                            val authApi = ApiClient.getRetrofit().create(AuthApiService::class.java)
+                            val request = RegisterRequest(
+                                username = username,
+                                name = name,
+                                email = email,
+                                password = password,
+                                role = "user"
+                            )
+                            val response = authApi.register(request)
+                            
+                            if (response.isSuccessful) {
+                                toastState = ToastState(
+                                    message = context.getString(R.string.auth_register_success),
+                                    type = ToastType.SUCCESS,
+                                    isVisible = true
+                                )
+                                delay(1500)
+                                onNavigateToLogin()
+                            } else {
+                                val errorBody = response.errorBody()?.string() ?: ""
+                                val parsedMessage = try {
+                                    val jsonObject = JSONObject(errorBody)
+                                    jsonObject.optString("detail", context.getString(R.string.auth_register_success))
+                                } catch (e: Exception) {
+                                    errorBody.ifEmpty { context.getString(R.string.auth_unknown_error) }
+                                }
+                                errorMessage = parsedMessage
+                            }
+                        } catch (e: Exception) {
+                            e.message?.let {
+                                if(it.contains("Unable to resolve host")){
+                                    errorMessage = context.getString(R.string.auth_error_internet)
+                                }else{
+                                    errorMessage = e.message ?: context.getString(R.string.auth_unknown_error)
+                                }
+                            }
+                        } finally {
+                            isLoading = false
+                        }
+                    }
                 } else {
                     errorMessage = validationError
                 }
@@ -253,22 +332,6 @@ fun RegisterScreen(
                     style = MaterialTheme.typography.labelLarge
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Terms and Conditions
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = stringResource(R.string.auth_agree_terms),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -323,11 +386,18 @@ fun RegisterScreen(
                 )
             }
         }
+        }
+        
+        CustomToast(
+            state = toastState,
+            onDismiss = { toastState = toastState.copy(isVisible = false) }
+        )
     }
 }
 
 private fun validateRegisterForm(
     username: String,
+    name: String,
     email: String,
     password: String,
     confirmPassword: String,
@@ -336,6 +406,7 @@ private fun validateRegisterForm(
     return when {
         username.isEmpty() -> context.getString(R.string.auth_error_empty_username)
         username.length < 3 -> context.getString(R.string.auth_error_username_short)
+        name.isEmpty() -> context.getString(R.string.auth_error_empty_name)
         email.isEmpty() -> context.getString(R.string.auth_error_empty_email)
         !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> context.getString(R.string.auth_error_invalid_email)
         password.isEmpty() -> context.getString(R.string.auth_error_empty_password)

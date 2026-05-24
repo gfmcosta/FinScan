@@ -35,7 +35,9 @@
     <string name="auth_login_subtitle">Inicie sessão na sua conta</string>
     <string name="auth_register_title">Criar Conta</string>
     <string name="auth_register_subtitle">Junte-se ao FinScan hoje</string>
+    <string name="auth_register_success">Utilizador registado com sucesso! Redirecionando para o Login…</string>
     <string name="auth_username_hint">Nome de utilizador</string>
+    <string name="auth_name_hint">Nome Completo</string>
     <string name="auth_email_hint">E-mail</string>
     <string name="auth_password_hint">Palavra-passe</string>
     <string name="auth_confirm_password_hint">Confirmar Palavra-passe</string>
@@ -47,11 +49,11 @@
     <string name="auth_has_account">Já tem uma conta?</string>
     <string name="auth_login_link_text">Inicie sessão</string>
     <string name="auth_or">ou</string>
-    <string name="auth_agree_terms">Ao registar-se, concorda com os Termos e Condições</string>
-    
+
     <!-- Mensagens de Erro de Autenticação -->
     <string name="auth_error_empty_fields">Por favor, preencha todos os campos</string>
     <string name="auth_error_empty_username">Nome de utilizador é obrigatório</string>
+    <string name="auth_error_empty_name">Nome completo é obrigatório</string>
     <string name="auth_error_username_short">Nome de utilizador deve ter pelo menos 3 caracteres</string>
     <string name="auth_error_empty_email">E-mail é obrigatório</string>
     <string name="auth_error_invalid_email">Por favor, introduza um e-mail válido</string>
@@ -61,4 +63,7 @@
     <string name="auth_error_password_mismatch">As palavras-passe não coincidem</string>
     <string name="auth_error_login_failed">Falha no login. Por favor, verifique as suas credenciais</string>
     <string name="auth_error_register_failed">Falha no registo. Por favor, tente novamente</string>
+    <string name="auth_unknown_error">Erro desconhecido. Contacte o administrador: aluno23692@ipt.pt</string>
+    <string name="auth_error_internet">Sem ligação à internet</string>
+
 </resources>

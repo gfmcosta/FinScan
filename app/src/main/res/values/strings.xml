@@ -35,7 +35,9 @@
     <string name="auth_login_subtitle">Sign in to your account</string>
     <string name="auth_register_title">Create Account</string>
     <string name="auth_register_subtitle">Join FinScan today</string>
+    <string name="auth_register_success">Registration successful! Redirecting to Login…</string>
     <string name="auth_username_hint">Username</string>
+    <string name="auth_name_hint">Full Name</string>
     <string name="auth_email_hint">Email</string>
     <string name="auth_password_hint">Password</string>
     <string name="auth_confirm_password_hint">Confirm Password</string>
@@ -47,11 +49,11 @@
     <string name="auth_has_account">Already have an account?</string>
     <string name="auth_login_link_text">Login</string>
     <string name="auth_or">or</string>
-    <string name="auth_agree_terms">By signing up, you agree to our Terms and Conditions</string>
-    
+
     <!-- Authentication Error Messages -->
     <string name="auth_error_empty_fields">Please fill in all fields</string>
     <string name="auth_error_empty_username">Username is required</string>
+    <string name="auth_error_empty_name">Full name is required</string>
     <string name="auth_error_username_short">Username must be at least 3 characters</string>
     <string name="auth_error_empty_email">Email is required</string>
     <string name="auth_error_invalid_email">Please enter a valid email</string>
@@ -61,4 +63,7 @@
     <string name="auth_error_password_mismatch">Passwords do not match</string>
     <string name="auth_error_login_failed">Login failed. Please check your credentials</string>
     <string name="auth_error_register_failed">Registration failed. Please try again</string>
+    <string name="auth_unknown_error">Unknown error. Please contact the administrator: aluno23692@ipt.pt</string>
+    <string name="auth_error_internet">No internet connection</string>
+
 </resources>

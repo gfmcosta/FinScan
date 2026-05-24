@@ -27,6 +27,7 @@ class AuthManager private constructor(private val context: Context) {
 
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
         private val USERNAME_KEY = stringPreferencesKey("auth_username")
+        private val NAME_KEY = stringPreferencesKey("auth_name")
     }
 
     // Flow para observar o token
@@ -39,16 +40,22 @@ class AuthManager private constructor(private val context: Context) {
         preferences[USERNAME_KEY]
     }
 
+    // Flow para observar o nome real do utilizador
+    val name: Flow<String?> = context.authDataStore.data.map { preferences ->
+        preferences[NAME_KEY]
+    }
+
     // Flow para verificar se está autenticado
     val isLoggedIn: Flow<Boolean> = context.authDataStore.data.map { preferences ->
         preferences[TOKEN_KEY] != null
     }
 
     // Guardar token após login
-    suspend fun saveToken(token: String, username: String) {
+    suspend fun saveToken(token: String, username: String, name: String? = null) {
         context.authDataStore.edit { preferences ->
             preferences[TOKEN_KEY] = token
             preferences[USERNAME_KEY] = username
+            name?.let { preferences[NAME_KEY] = it }
         }
     }
 
@@ -57,6 +64,7 @@ class AuthManager private constructor(private val context: Context) {
         context.authDataStore.edit { preferences ->
             preferences.remove(TOKEN_KEY)
             preferences.remove(USERNAME_KEY)
+            preferences.remove(NAME_KEY)
         }
     }
 

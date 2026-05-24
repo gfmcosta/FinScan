@@ -44,10 +44,10 @@ class AuthViewModel(context: Context) : ViewModel() {
         }
     }
 
-    fun register(username: String, email: String, password: String) {
+    fun register(username: String, name: String, email: String, password: String) {
         viewModelScope.launch {
             _registerState.value = RegisterState.Loading
-            val result = authService.register(username, email, password)
+            val result = authService.register(username, name, email, password)
             _registerState.value = when (result) {
                 is AuthService.Result.Success -> RegisterState.Success
                 is AuthService.Result.Error -> RegisterState.Error(result.message)
