@@ -128,6 +128,9 @@ def forgot_password(
     db.add(user)
     db.commit()
 
+    # Log para debug
+    print(f"DEBUG: Utilizador encontrado. A disparar e-mail para {user.email} com código {code}", flush=True)
+
     # Enviar e-mail em background para evitar timeout da API
     background_tasks.add_task(send_reset_code_email, user.email, code)
 
