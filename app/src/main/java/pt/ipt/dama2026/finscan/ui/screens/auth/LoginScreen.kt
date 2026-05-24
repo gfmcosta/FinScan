@@ -241,7 +241,7 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Forgot Password Link (opcional)
             TextButton(
@@ -250,12 +250,12 @@ fun LoginScreen(
             ) {
                 Text(
                     text = stringResource(R.string.auth_forgot_password),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelLarge,
                     color = IndigoTechnological
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Divider
             Row(
@@ -271,7 +271,7 @@ fun LoginScreen(
                 )
                 Text(
                     text = stringResource(R.string.auth_or),
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
@@ -282,7 +282,7 @@ fun LoginScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Register Link
             Row(
@@ -292,7 +292,7 @@ fun LoginScreen(
             ) {
                 Text(
                     text = stringResource(R.string.auth_no_account),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -302,7 +302,7 @@ fun LoginScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.auth_register_link_text),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = IndigoTechnological
                     )
                 }

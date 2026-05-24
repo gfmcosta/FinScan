@@ -57,6 +57,7 @@ fun ForgotPasswordScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
     ) {
         // Top Bar
         Row(
@@ -69,14 +70,17 @@ fun ForgotPasswordScreen(
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onBackground
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(24.dp)
                 )
             }
             Text(
                 text = stringResource(R.string.auth_forgot_password),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 16.dp)
             )
         }
 
