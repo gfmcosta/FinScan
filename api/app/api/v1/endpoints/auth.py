@@ -47,6 +47,7 @@ def register(user_in: UserCreate, db: Annotated[Session, Depends(get_db)]) -> Us
     user = User(
         username=user_in.username,
         email=user_in.email,
+        name=user_in.name,
         hashed_password=get_password_hash(user_in.password),
         role=user_in.role,
     )
@@ -79,4 +80,4 @@ def login(
             detail="Invalid email format",
         )
     token = create_access_token(subject=user.username, role=user.role.value)
-    return Token(access_token=token)
+    return Token(access_token=token, name=user.name)
