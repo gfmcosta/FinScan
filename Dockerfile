@@ -12,7 +12,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar código da API
 COPY api/app ./app
-COPY api/.env .env
 
 # Expor porto
 EXPOSE 8000
