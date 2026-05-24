@@ -153,11 +153,16 @@ def reset_password(
     now = datetime.now(UTC).replace(tzinfo=None) # Tornar 'now' ingénuo para comparar com a BD
     expires_at = user.reset_code_expires_at
 
-    if expires_at and expires_at < now:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Reset code has expired",
-        )
+    if expires_at:
+        # Se expires_at for apenas uma data (sem horas), convertê-la para datetime
+        if not hasattr(expires_at, "hour"):
+             expires_at = datetime.combine(expires_at, datetime.min.time())
+
+        if expires_at < now:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Reset code has expired",
+            )
 
     user.hashed_password = get_password_hash(request.new_password)
     user.reset_code = None
