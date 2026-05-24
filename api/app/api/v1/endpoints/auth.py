@@ -123,7 +123,7 @@ def forgot_password(
     # Gerar código de 6 dígitos
     code = "".join(random.choices(string.digits, k=6))
     user.reset_code = code
-    user.reset_code_expires_at = datetime.now(UTC) + timedelta(minutes=15)
+    user.reset_code_expires_at = datetime.now() + timedelta(minutes=15)
 
     db.add(user)
     db.commit()
@@ -150,13 +150,15 @@ def reset_password(
         )
 
     # Comparação robusta de expiração
-    now = datetime.now(UTC).replace(tzinfo=None) # Tornar 'now' ingénuo para comparar com a BD
+    now = datetime.now()
     expires_at = user.reset_code_expires_at
 
     if expires_at:
         # Se expires_at for apenas uma data (sem horas), convertê-la para datetime
         if not hasattr(expires_at, "hour"):
              expires_at = datetime.combine(expires_at, datetime.min.time())
+
+        print(f"DEBUG RESET: now={now}, expires_at={expires_at}", flush=True)
 
         if expires_at < now:
             raise HTTPException(
