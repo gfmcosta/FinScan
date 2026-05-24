@@ -18,11 +18,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import pt.ipt.dama2026.finscan.R
 import pt.ipt.dama2026.finscan.ui.theme.*
 import java.text.SimpleDateFormat
@@ -140,8 +139,7 @@ fun PlaceholderScreen(title: String) {
     ) {
         Text(
             text = title,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground
         )
     }
@@ -171,13 +169,12 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
             Column {
                 Text(
                     text = stringResource(R.string.home_hi_title) + userName,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = currentDate,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = getAdaptiveSubtext()
                 )
             }
@@ -218,16 +215,13 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = stringResource(R.string.home_monthly_spent_title),
-                        color = Color.White.copy(alpha = 0.8f),
-                        fontSize = 16.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White.copy(alpha = 0.8f)
                     )
                     Text(
                         text = "$monthlySpent€",
+                        style = MaterialTheme.typography.headlineLarge,
                         color = Color.White,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -240,8 +234,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
         // Chart Section
         Text(
             text = stringResource(R.string.home_category_spent_title),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
 
@@ -322,7 +315,7 @@ fun BarChartPlaceholder(
             labels.forEach { label ->
                 Text(
                     text = label,
-                    fontSize = 10.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = getAdaptiveSubtext()
                 )
             }
@@ -371,7 +364,7 @@ fun CategoryLegendItem(label: String, amount: String, color: Color) {
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = "$label ($amount€)",
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.bodySmall,
             color = getAdaptiveSubtext(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis

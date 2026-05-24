@@ -19,12 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import kotlinx.coroutines.launch
-import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import pt.ipt.dama2026.finscan.ui.theme.*
 import pt.ipt.dama2026.finscan.R
 
@@ -77,8 +73,7 @@ fun SettingsMainContent(
     ) {
         Text(
             text = stringResource(R.string.settings_label),
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 24.dp)
         )
@@ -106,17 +101,16 @@ fun SettingsMainContent(
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
+             Column(modifier = Modifier.weight(1f)) {
                 // TODO: Remove in PROD
                 Text(
                     text = "Costa",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = stringResource(R.string.settings_edit_user_label),
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = getAdaptiveSubtext()
                 )
             }
@@ -187,8 +181,7 @@ fun SettingsMainContent(
 fun SettingsSectionHeader(title: String) {
     Text(
         text = title,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.SemiBold,
+        style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
     )
@@ -221,21 +214,21 @@ fun SettingsClickableItem(
                 modifier = Modifier.size(20.dp),
                 tint = SettingsIconTintColor
             )
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = label,
-            modifier = Modifier.weight(1f),
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Icon(
-            Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = getAdaptiveControlColor()
-        )
-    }
-}
+         }
+         Spacer(modifier = Modifier.width(16.dp))
+         Text(
+             text = label,
+             modifier = Modifier.weight(1f),
+             style = MaterialTheme.typography.titleMedium,
+             color = MaterialTheme.colorScheme.onBackground
+         )
+         Icon(
+             Icons.AutoMirrored.Filled.KeyboardArrowRight,
+             contentDescription = null,
+             tint = getAdaptiveControlColor()
+         )
+     }
+ }
 
 @Composable
 fun SettingsSwitchItem(
@@ -264,15 +257,15 @@ fun SettingsSwitchItem(
                 modifier = Modifier.size(20.dp),
                 tint = SettingsIconTintColor
             )
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = label,
-            modifier = Modifier.weight(1f),
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Switch(
+         }
+         Spacer(modifier = Modifier.width(16.dp))
+         Text(
+             text = label,
+             modifier = Modifier.weight(1f),
+             style = MaterialTheme.typography.titleMedium,
+             color = MaterialTheme.colorScheme.onBackground
+         )
+         Switch(
             checked = initialValue,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(

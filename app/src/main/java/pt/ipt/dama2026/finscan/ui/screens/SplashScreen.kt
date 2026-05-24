@@ -31,10 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import pt.ipt.dama2026.finscan.R
 import pt.ipt.dama2026.finscan.ui.theme.*
@@ -79,15 +76,13 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
             // Text
             Text(
                 text = "Fin",
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.offset(y = (-5).dp)
             )
             Text(
                 text = "Scan",
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineLarge,
                 color = IndigoTechnological,
                 modifier = Modifier.offset(y = (-10).dp)
             )
@@ -95,7 +90,7 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
             // Tagline
             Text(
                 text = stringResource(R.string.splash_tag_line),
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.bodyLarge,
                 color = getAdaptiveSubtext(),
                 modifier = Modifier.offset(y = 10.dp)
             )
@@ -107,7 +102,7 @@ fun SplashScreen(onNavigateToHome: () -> Unit = {}) {
             // Loading text
             Text(
                 text = stringResource(R.string.splash_loading_text),
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = getAdaptiveSubtext(),
                 modifier = Modifier.offset(y = 15.dp)
             )
