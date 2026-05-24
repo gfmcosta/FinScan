@@ -98,7 +98,41 @@ uvicorn app.main:app --reload
 
 ---
 
-## 📚 Documentação da API (Swagger UI)
+## � Como correr com Docker (Recomendado)
+
+O projeto está configurado com **Docker** e **Docker Compose**, levantando automaticamente a API e uma base de dados **PostgreSQL**.
+
+**1. Configurar as variáveis de ambiente:**
+Tal como na versão local, é necessário criar o ficheiro `.env`:
+```bash
+cp env.example .env
+```
+*(Abra o `.env` e confirme que o `DATABASE_URL` aponta para o Postgres, e coloque a sua chave do Gemini, etc).*
+
+**2. Construir e Iniciar os contentores:**
+```bash
+docker-compose up --build -d
+```
+
+Este comando irá baixar a imagem do PostgreSQL e pgAdmin, construir a imagem da API, e correr tudo em plano de fundo (`-d`). 
+
+- A sua API ficará disponível em: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- A Base de Dados PostgreSQL estará a correr no porto `5432`.
+- O **pgAdmin** ficará disponível em: [http://127.0.0.1:5050](http://127.0.0.1:5050) (Login por defeito: `admin@finscan.local` / `admin`).
+
+**Para ver os logs (erros ou outputs):**
+```bash
+docker-compose logs -f api
+```
+
+**Para parar a aplicação:**
+```bash
+docker-compose down
+```
+
+---
+
+## �📚 Documentação da API (Swagger UI)
 
 Uma vez que o servidor esteja a correr, o FastAPI gera automaticamente a documentação interativa para testar todos os endpoints. 
 

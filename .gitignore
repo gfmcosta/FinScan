@@ -72,3 +72,4 @@ yarn-error.log
 .gradle/
 .kotlin/
 local.properties
+servers.json
