@@ -31,7 +31,7 @@ import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
 fun SettingsScreen() {
     // Instance LocalContext storage
     val context = LocalContext.current
-    val settingsManager = remember { SettingsManager(context) }
+    val settingsManager = remember { SettingsManager.getInstance(context) }
     // get darkMode key from shared preferences or use the preference from the system
     val isDarkModeStored by settingsManager.isDarkMode.collectAsState(initial = null)
     val currentDarkMode = isDarkModeStored ?: false

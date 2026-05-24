@@ -26,7 +26,7 @@ import pt.ipt.dama2026.finscan.ui.theme.*
 @Composable
 fun LanguageSelectionScreen(onBack: () -> Unit = {}) {
     val context = LocalContext.current
-    val settingsManager = remember { SettingsManager(context) }
+    val settingsManager = remember { SettingsManager.getInstance(context) }
     val currentLanguage by settingsManager.language.collectAsState(initial = "pt")
     val scope = rememberCoroutineScope()
 
@@ -75,6 +75,8 @@ fun LanguageSelectionScreen(onBack: () -> Unit = {}) {
                 onClick = {
                     scope.launch {
                         settingsManager.setLanguage("pt")
+                        // Small delay to ensure DataStore update is processed
+                        kotlinx.coroutines.delay(100)
                     }
                 }
             )
@@ -86,6 +88,8 @@ fun LanguageSelectionScreen(onBack: () -> Unit = {}) {
                 onClick = {
                     scope.launch {
                         settingsManager.setLanguage("en")
+                        // Small delay to ensure DataStore update is processed
+                        kotlinx.coroutines.delay(100)
                     }
                 }
             )

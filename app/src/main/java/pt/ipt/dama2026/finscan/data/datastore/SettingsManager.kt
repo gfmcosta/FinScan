@@ -24,6 +24,20 @@ class SettingsManager(private val context: Context) {
         val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
         // String preference key language
         val LANGUAGE_KEY = stringPreferencesKey("language")
+        
+        // Singleton instance - initialized lazily on first access
+        @Volatile
+        private var instance: SettingsManager? = null
+        
+        /**
+         * Returns singleton instance of SettingsManager
+         * Thread-safe using double-checked locking
+         */
+        fun getInstance(context: Context): SettingsManager {
+            return instance ?: synchronized(this) {
+                instance ?: SettingsManager(context.applicationContext).also { instance = it }
+            }
+        }
     }
 
     // Read theme preference (default to false/light mode if not set)
@@ -70,7 +84,6 @@ class SettingsManager(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[LANGUAGE_KEY] = lang
         }
-        updateResourceLocale(lang)
     }
 
     /**
