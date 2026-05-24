@@ -2,6 +2,7 @@ package pt.ipt.dama2026.finscan.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -29,25 +30,27 @@ fun AboutUsScreen(onBack: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .padding(horizontal = 24.dp)
     ) {
-        // Top Bar with Back Button
+        // Top Bar with Back Button (Consistent with Language Screen)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(bottom = 32.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { onBack() },
+                tint = MaterialTheme.colorScheme.onBackground
+            )
             Text(
                 text = stringResource(R.string.settings_about_us_label),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .weight(1f)
@@ -59,8 +62,7 @@ fun AboutUsScreen(onBack: () -> Unit = {}) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // App Name

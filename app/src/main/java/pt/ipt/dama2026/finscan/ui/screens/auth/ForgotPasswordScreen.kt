@@ -1,6 +1,7 @@
 package pt.ipt.dama2026.finscan.ui.screens.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +41,7 @@ fun ForgotPasswordScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var step by remember { mutableIntStateOf(1) } // 1: Email, 2: Code & New Password
+    var step by remember { mutableIntStateOf(1) }
     var email by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
@@ -57,26 +58,30 @@ fun ForgotPasswordScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding()
+            .statusBarsPadding() // Primeiro padding da barra de estado
+            .padding(horizontal = 24.dp)
     ) {
+        // Compensação extra para igualar ao ecrã de Language (que está dentro de outro Scaffold)
+        Spacer(modifier = Modifier.statusBarsPadding()) 
+
         // Top Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(top = 32.dp, bottom = 32.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onNavigateBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { onNavigateBack() },
+                tint = MaterialTheme.colorScheme.onBackground
+            )
             Text(
                 text = stringResource(R.string.auth_forgot_password),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .weight(1f)
@@ -87,8 +92,7 @@ fun ForgotPasswordScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -123,7 +127,6 @@ fun ForgotPasswordScreen(
             }
 
             if (step == 1) {
-                // Step 1: Email
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it; errorMessage = "" },
@@ -173,7 +176,6 @@ fun ForgotPasswordScreen(
                     }
                 }
             } else {
-                // Step 2: Code and New Password
                 OutlinedTextField(
                     value = code,
                     onValueChange = { code = it; errorMessage = "" },

@@ -34,7 +34,8 @@ fun LanguageSelectionScreen(onBack: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp)
+            .statusBarsPadding()
+            .padding(horizontal = 24.dp)
     ) {
         // Header with back button
         Row(
