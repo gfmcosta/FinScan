@@ -21,8 +21,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import pt.ipt.dama2026.finscan.ui.theme.*
 import pt.ipt.dama2026.finscan.R
+import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
 
 
 @Composable
