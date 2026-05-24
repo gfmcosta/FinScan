@@ -16,22 +16,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import pt.ipt.dama2026.finscan.R
 import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
-import pt.ipt.dama2026.finscan.ui.theme.FinScanTheme
-import pt.ipt.dama2026.finscan.ui.theme.IndigoTechnological
-import pt.ipt.dama2026.finscan.ui.theme.EmeraldGreen
-import pt.ipt.dama2026.finscan.ui.theme.getAdaptiveSubtext
+import pt.ipt.dama2026.finscan.ui.theme.*
 
 @Composable
 fun LanguageSelectionScreen(onBack: () -> Unit = {}) {
     val context = LocalContext.current
-    val settingsManager = remember { SettingsManager(context) }
+    val settingsManager = remember { SettingsManager.getInstance(context) }
     val currentLanguage by settingsManager.language.collectAsState(initial = "pt")
     val scope = rememberCoroutineScope()
 
@@ -58,8 +53,7 @@ fun LanguageSelectionScreen(onBack: () -> Unit = {}) {
             )
             Text(
                 text = stringResource(R.string.settings_language_label),
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .weight(1f)
@@ -81,6 +75,8 @@ fun LanguageSelectionScreen(onBack: () -> Unit = {}) {
                 onClick = {
                     scope.launch {
                         settingsManager.setLanguage("pt")
+                        // Small delay to ensure DataStore update is processed
+                        kotlinx.coroutines.delay(100)
                     }
                 }
             )
@@ -92,6 +88,8 @@ fun LanguageSelectionScreen(onBack: () -> Unit = {}) {
                 onClick = {
                     scope.launch {
                         settingsManager.setLanguage("en")
+                        // Small delay to ensure DataStore update is processed
+                        kotlinx.coroutines.delay(100)
                     }
                 }
             )
@@ -144,7 +142,7 @@ fun LanguageItem(
                 ) {
                     Text(
                         text = flag,
-                        fontSize = 36.sp
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
 
@@ -153,15 +151,13 @@ fun LanguageItem(
                 Column {
                     Text(
                         text = name,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = code.uppercase(),
-                        fontSize = 13.sp,
-                        color = getAdaptiveSubtext(),
-                        fontWeight = FontWeight.Medium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = getAdaptiveSubtext()
                     )
                 }
             }
@@ -178,8 +174,7 @@ fun LanguageItem(
                     Text(
                         text = "✓",
                         color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }

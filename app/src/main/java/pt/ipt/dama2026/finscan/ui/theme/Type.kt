@@ -32,6 +32,11 @@ val interFontFamily = FontFamily(
         googleFont = GoogleFont("Inter"),
         fontProvider = provider,
         weight = FontWeight.Bold
+    ),
+    Font(
+        googleFont = GoogleFont("Inter"),
+        fontProvider = provider,
+        weight = FontWeight.Medium
     )
 )
 

@@ -24,8 +24,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // settingsManager data storage instance
-        val settingsManager = SettingsManager(this)
+        // Use singleton settingsManager instance
+        val settingsManager = SettingsManager.getInstance(this)
 
         setContent {
             // Observe settings - start with null to detect when DataStore has finished reading
@@ -40,7 +40,9 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
                 
                 // Force the configuration and context to use the selected language
-                val configAndContext = remember(currentLanguage, currentConfig) {
+                // Key change: removed currentConfig from remember dependency - only use currentLanguage
+                // This ensures the wrapped context is recreated EVERY time the language changes
+                val configAndContext = remember(currentLanguage) {
                     val locale = java.util.Locale.forLanguageTag(currentLanguage)
                     java.util.Locale.setDefault(locale)
                     
@@ -60,7 +62,7 @@ class MainActivity : ComponentActivity() {
                     settingsManager.setLanguageIfMissing(currentLanguage)
                 }
 
-                // Also update the system resources in the background
+                // Update the system resources in the background when language changes
                 LaunchedEffect(currentLanguage) {
                     settingsManager.updateResourceLocale(currentLanguage)
                 }
