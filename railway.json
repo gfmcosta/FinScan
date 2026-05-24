@@ -2,9 +2,5 @@
   "build": {
     "builder": "dockerfile"
   },
-  "deploy": {
-    "numReplicas": 1,
-    "startCommand": "docker-compose up"
-  },
   "$schema": "https://railway.app/railway.schema.json"
 }
