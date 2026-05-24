@@ -15,8 +15,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
+import pt.ipt.dama2026.finscan.data.datastore.AuthManager
 import pt.ipt.dama2026.finscan.ui.screens.SplashScreen
 import pt.ipt.dama2026.finscan.ui.screens.MainScreen
+import pt.ipt.dama2026.finscan.ui.screens.auth.AuthNavigationFlow
 import pt.ipt.dama2026.finscan.ui.theme.FinScanTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,6 +28,7 @@ class MainActivity : ComponentActivity() {
 
         // Use singleton settingsManager instance
         val settingsManager = SettingsManager.getInstance(this)
+        val authManager = AuthManager.getInstance(this)
 
         setContent {
             // Observe settings - start with null to detect when DataStore has finished reading
@@ -73,7 +76,7 @@ class MainActivity : ComponentActivity() {
                     LocalContext provides wrappedContext
                 ) {
                     FinScanTheme(darkTheme = useDarkMode) {
-                        MainApp()
+                        MainApp(authManager)
                     }
                 }
             }
@@ -82,17 +85,31 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainApp() {
-    val showSplash = remember { mutableStateOf(true) }
-    if (showSplash.value) {
-        SplashScreen(
-            onNavigateToHome = {
-                showSplash.value = false
-            }
-        )
-    } else {
-        // App main content
-        MainScreen()
+fun MainApp(authManager: AuthManager) {
+    val isLoggedIn by authManager.isLoggedIn.collectAsState(initial = false)
+    val showSplash = remember { mutableStateOf(!isLoggedIn) }
+
+    when {
+        !isLoggedIn -> {
+            // Mostrar fluxo de autenticação
+            AuthNavigationFlow(
+                onAuthSuccess = {
+                    // Após login bem-sucedido, mostrar splash antes do app principal
+                    showSplash.value = true
+                }
+            )
+        }
+        showSplash.value -> {
+            SplashScreen(
+                onNavigateToHome = {
+                    showSplash.value = false
+                }
+            )
+        }
+        else -> {
+            // App main content
+            MainScreen()
+        }
     }
 }
 
