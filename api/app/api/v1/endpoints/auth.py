@@ -149,7 +149,11 @@ def reset_password(
             detail="Invalid email or code",
         )
 
-    if user.reset_code_expires_at.replace(tzinfo=UTC) < datetime.now(UTC):
+    # Comparação robusta de expiração
+    now = datetime.now(UTC).replace(tzinfo=None) # Tornar 'now' ingénuo para comparar com a BD
+    expires_at = user.reset_code_expires_at
+
+    if expires_at and expires_at < now:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Reset code has expired",
