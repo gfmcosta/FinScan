@@ -70,6 +70,7 @@ fun SettingsScreen() {
             scope = scope,
             onNavigateToLanguage = { currentScreen = "language" },
             onNavigateToAboutUs = { currentScreen = "about_us" },
+            onNavigateToChangePassword = { currentScreen = "change_password" },
             onLogout = {
                 scope.launch {
                     authManager.clearAuth()
@@ -80,6 +81,9 @@ fun SettingsScreen() {
             onBack = { currentScreen = "settings" }
         )
         "about_us" -> AboutUsScreen(
+            onBack = { currentScreen = "settings" }
+        )
+        "change_password" -> ChangePasswordScreen(
             onBack = { currentScreen = "settings" }
         )
     }
@@ -94,6 +98,7 @@ fun SettingsMainContent(
     scope: kotlinx.coroutines.CoroutineScope,
     onNavigateToLanguage: () -> Unit = {},
     onNavigateToAboutUs: () -> Unit = {},
+    onNavigateToChangePassword: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -218,7 +223,8 @@ fun SettingsMainContent(
         SettingsClickableItem(
             icon = Icons.Default.Lock,
             iconContainerColor = SettingsChangePasswordColor,
-            label = stringResource(R.string.settings_change_password)
+            label = stringResource(R.string.settings_change_password),
+            onClick = onNavigateToChangePassword
         )
 
         SettingsSectionHeader(stringResource(R.string.settings_notifications_label))

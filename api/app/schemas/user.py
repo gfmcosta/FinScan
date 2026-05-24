@@ -20,3 +20,8 @@ class UserRead(UserBase):
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str

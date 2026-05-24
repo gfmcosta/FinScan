@@ -35,6 +35,19 @@
     <string name="about_us_institution_name">Polytechnic Institute of Tomar</string>
     <string name="about_us_version_label">Version</string>
     
+    <!-- Change Password Strings -->
+    <string name="change_password_title">Change Password</string>
+    <string name="change_password_subtitle">Choose a strong password for your security</string>
+    <string name="change_password_current_hint">Current Password</string>
+    <string name="change_password_new_hint">New Password</string>
+    <string name="change_password_confirm_hint">Confirm New Password</string>
+    <string name="change_password_button">Update Password</string>
+    <string name="change_password_success">Password updated successfully!</string>
+    <string name="change_password_error_current_empty">Current password is required</string>
+    <string name="change_password_error_new_empty">New password is required</string>
+    <string name="change_password_error_new_short">New password must be at least 6 characters</string>
+    <string name="change_password_error_mismatch">New passwords do not match</string>
+
     <!-- Authentication Strings -->
     <string name="auth_login_title">Welcome Back</string>
     <string name="auth_login_subtitle">Sign in to your account</string>

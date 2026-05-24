@@ -23,6 +23,13 @@ data class RegisterRequest(
     val role: String = "user"
 )
 
+data class ChangePasswordRequest(
+    @SerializedName("current_password")
+    val currentPassword: String,
+    @SerializedName("new_password")
+    val newPassword: String
+)
+
 // Response Models
 data class TokenResponse(
     @SerializedName("access_token")
