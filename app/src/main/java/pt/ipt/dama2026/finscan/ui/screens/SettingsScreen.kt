@@ -47,9 +47,13 @@ fun SettingsScreen() {
             currentDarkMode = currentDarkMode,
             settingsManager = settingsManager,
             scope = scope,
-            onNavigateToLanguage = { currentScreen = "language" }
+            onNavigateToLanguage = { currentScreen = "language" },
+            onNavigateToAboutUs = { currentScreen = "about_us" }
         )
         "language" -> LanguageSelectionScreen(
+            onBack = { currentScreen = "settings" }
+        )
+        "about_us" -> AboutUsScreen(
             onBack = { currentScreen = "settings" }
         )
     }
@@ -60,7 +64,8 @@ fun SettingsMainContent(
     currentDarkMode: Boolean,
     settingsManager: SettingsManager,
     scope: kotlinx.coroutines.CoroutineScope,
-    onNavigateToLanguage: () -> Unit = {}
+    onNavigateToLanguage: () -> Unit = {},
+    onNavigateToAboutUs: () -> Unit = {}
 ) {
 
     Column(
@@ -172,7 +177,8 @@ fun SettingsMainContent(
         SettingsClickableItem(
             icon = Icons.Default.Info,
             iconContainerColor = SettingsAboutUsColor,
-            label = stringResource(R.string.settings_about_us_label)
+            label = stringResource(R.string.settings_about_us_label),
+            onClick = onNavigateToAboutUs
         )
     }
 }

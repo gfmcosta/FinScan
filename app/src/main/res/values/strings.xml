@@ -23,4 +23,10 @@
     <string name="language_back_label">Back</string>
     <string name="language_portuguese_label">Portuguese</string>
     <string name="language_english_label">English</string>
+    <string name="about_us_description">FinScan is a mobile application designed to help you manage your finances by scanning and organizing your receipts.</string>
+    <string name="about_us_author_label">Developer</string>
+    <string name="about_us_author_name">Gonçalo Costa</string>
+    <string name="about_us_institution_label">Institution</string>
+    <string name="about_us_institution_name">Polytechnic Institute of Tomar</string>
+    <string name="about_us_version_label">Version</string>
 </resources>
