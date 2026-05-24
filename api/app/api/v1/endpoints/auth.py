@@ -27,7 +27,23 @@ def register(user_in: UserCreate, db: Annotated[Session, Depends(get_db)]) -> Us
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username or email already exists",
         )
-
+    # Validations
+    if user_in.role not in ["admin", "user"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Role must be either 'admin' or 'user'",
+        )
+    if user_in.username.strip() == "" or user_in.email.strip() == "" or user_in.password.strip() == "":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username, email, and password cannot be empty",
+        )
+    if user_in.email.count("@") != 1 or "." not in user_in.email.split("@")[1]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email format",
+        )
+    
     user = User(
         username=user_in.username,
         email=user_in.email,
@@ -51,6 +67,16 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
-
+    # Validations
+    if user.username.strip() == "" or user.email.strip() == "" or user.hashed_password.strip() == "":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User data is incomplete",
+        )
+    if user.email.count("@") != 1 or "." not in user.email.split("@")[1]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email format",
+        )
     token = create_access_token(subject=user.username, role=user.role.value)
     return Token(access_token=token)
