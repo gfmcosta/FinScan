@@ -20,6 +20,11 @@
     <string name="settings_language_label">Language</string>
     <string name="settings_logout_label">Logout</string>
     <string name="settings_about_us_label">About us</string>
+    <string name="settings_logout_confirm_title">Logout</string>
+    <string name="settings_logout_confirm_message">Are you sure you want to sign out?</string>
+    <string name="settings_logout_confirm_yes">Yes, Logout</string>
+    <string name="settings_logout_confirm_no">Cancel</string>
+    <string name="settings_logout_success">Logged out successfully</string>
     <string name="language_back_label">Back</string>
     <string name="language_portuguese_label">Portuguese</string>
     <string name="language_english_label">English</string>
@@ -30,6 +35,19 @@
     <string name="about_us_institution_name">Polytechnic Institute of Tomar</string>
     <string name="about_us_version_label">Version</string>
     
+    <!-- Change Password Strings -->
+    <string name="change_password_title">Change Password</string>
+    <string name="change_password_subtitle">Choose a strong password for your security</string>
+    <string name="change_password_current_hint">Current Password</string>
+    <string name="change_password_new_hint">New Password</string>
+    <string name="change_password_confirm_hint">Confirm New Password</string>
+    <string name="change_password_button">Update Password</string>
+    <string name="change_password_success">Password updated successfully!</string>
+    <string name="change_password_error_current_empty">Current password is required</string>
+    <string name="change_password_error_new_empty">New password is required</string>
+    <string name="change_password_error_new_short">New password must be at least 6 characters</string>
+    <string name="change_password_error_mismatch">New passwords do not match</string>
+
     <!-- Authentication Strings -->
     <string name="auth_login_title">Welcome Back</string>
     <string name="auth_login_subtitle">Sign in to your account</string>

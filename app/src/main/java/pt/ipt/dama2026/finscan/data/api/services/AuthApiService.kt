@@ -2,10 +2,7 @@ package pt.ipt.dama2026.finscan.data.api.services
 
 import pt.ipt.dama2026.finscan.data.api.models.*
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
+import retrofit2.http.*
 
 interface AuthApiService {
     @FormUrlEncoded
@@ -17,4 +14,7 @@ interface AuthApiService {
 
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): Response<UserResponse>
+
+    @POST("auth/change-password")
+    suspend fun changePassword(@Body request: ChangePasswordRequest): Response<Unit>
 }

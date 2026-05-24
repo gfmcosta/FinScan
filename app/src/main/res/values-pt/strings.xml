@@ -20,6 +20,11 @@
     <string name="settings_language_label">Idioma</string>
     <string name="settings_logout_label">Terminar Sessão</string>
     <string name="settings_about_us_label">Sobre Nós</string>
+    <string name="settings_logout_confirm_title">Terminar Sessão</string>
+    <string name="settings_logout_confirm_message">Tem a certeza que deseja sair?</string>
+    <string name="settings_logout_confirm_yes">Sim, Sair</string>
+    <string name="settings_logout_confirm_no">Cancelar</string>
+    <string name="settings_logout_success">Sessão terminada com sucesso</string>
     <string name="language_back_label">Voltar</string>
     <string name="language_portuguese_label">Português</string>
     <string name="language_english_label">Inglês</string>
@@ -30,6 +35,19 @@
     <string name="about_us_institution_name">Instituto Politécnico de Tomar</string>
     <string name="about_us_version_label">Versão</string>
     
+    <!-- Cadeias de Alteração de Palavra-passe -->
+    <string name="change_password_title">Alterar Palavra-passe</string>
+    <string name="change_password_subtitle">Escolha uma palavra-passe forte para sua segurança</string>
+    <string name="change_password_current_hint">Palavra-passe Atual</string>
+    <string name="change_password_new_hint">Nova Palavra-passe</string>
+    <string name="change_password_confirm_hint">Confirmar Nova Palavra-passe</string>
+    <string name="change_password_button">Atualizar Palavra-passe</string>
+    <string name="change_password_success">Palavra-passe atualizada com sucesso!</string>
+    <string name="change_password_error_current_empty">Palavra-passe atual é obrigatória</string>
+    <string name="change_password_error_new_empty">Nova palavra-passe é obrigatória</string>
+    <string name="change_password_error_new_short">Nova palavra-passe deve ter pelo menos 6 caracteres</string>
+    <string name="change_password_error_mismatch">As novas palavras-passe não coincidem</string>
+
     <!-- Cadeias de Autenticação -->
     <string name="auth_login_title">Bem-vindo</string>
     <string name="auth_login_subtitle">Inicie sessão na sua conta</string>

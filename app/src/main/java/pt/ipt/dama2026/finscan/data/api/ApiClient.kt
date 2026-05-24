@@ -1,6 +1,7 @@
 package pt.ipt.dama2026.finscan.data.api
 
 import android.content.Context
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
 import okhttp3.Interceptor
@@ -57,19 +58,24 @@ object ApiClient {
 
     private fun authInterceptor(): Interceptor = Interceptor { chain ->
         val originalRequest = chain.request()
+        
+        // Skip adding token if it's login or register
+        val path = originalRequest.url.encodedPath
+        if (path.endsWith("auth/login") || path.endsWith("auth/register")) {
+            return@Interceptor chain.proceed(originalRequest)
+        }
+
         var authenticatedRequest = originalRequest
 
-        // Try to get the token (non-blocking)
         authManager?.let { manager ->
             try {
-                // If you need to get token synchronously, you can use runBlocking
-                // but it's better to pass token through a different approach
-                // For now, we'll skip adding token for non-auth endpoints
+                // Get token synchronously using runBlocking (common in OkHttp interceptors with DataStore)
+                val token = runBlocking { manager.getTokenSync() }
                 
-                // Add the token if it exists
                 authenticatedRequest = originalRequest.newBuilder().apply {
-                    // Note: For proper token handling, consider using suspend functions
-                    // or passing the token directly to the service methods
+                    if (!token.isNullOrEmpty()) {
+                        addHeader("Authorization", "Bearer $token")
+                    }
                     addHeader("Content-Type", "application/json")
                 }.build()
             } catch (e: Exception) {
