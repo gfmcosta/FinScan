@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_password: str = ""
-    emails_from: str = "noreply@finscan.com"
+    emails_from: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",

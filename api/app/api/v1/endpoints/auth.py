@@ -3,7 +3,7 @@ import string
 from datetime import datetime, timedelta, UTC
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -112,14 +112,15 @@ def change_password(
 @router.post("/forgot-password")
 def forgot_password(
     request: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
     db: Annotated[Session, Depends(get_db)],
 ):
     user = db.query(User).filter(User.email == request.email).first()
     if not user:
-        # We return 200 even if user doesn't exist for security reasons (don't leak emails)
+        # Por segurança, retornamos sucesso mesmo que o email não exista
         return {"detail": "If the email exists, a reset code has been sent"}
 
-    # Generate 6-digit code
+    # Gerar código de 6 dígitos
     code = "".join(random.choices(string.digits, k=6))
     user.reset_code = code
     user.reset_code_expires_at = datetime.now(UTC) + timedelta(minutes=15)
@@ -127,14 +128,10 @@ def forgot_password(
     db.add(user)
     db.commit()
 
-    # Send email
-    if send_reset_code_email(user.email, code):
-        return {"detail": "Reset code sent successfully"}
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to send reset email",
-        )
+    # Enviar e-mail em background para evitar timeout da API
+    background_tasks.add_task(send_reset_code_email, user.email, code)
+
+    return {"detail": "Reset code sent successfully"}
 
 
 @router.post("/reset-password")
