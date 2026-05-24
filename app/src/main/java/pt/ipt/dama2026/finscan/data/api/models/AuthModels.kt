@@ -30,6 +30,20 @@ data class ChangePasswordRequest(
     val newPassword: String
 )
 
+data class ForgotPasswordRequest(
+    @SerializedName("email")
+    val email: String
+)
+
+data class ResetPasswordRequest(
+    @SerializedName("email")
+    val email: String,
+    @SerializedName("code")
+    val code: String,
+    @SerializedName("new_password")
+    val newPassword: String
+)
+
 // Response Models
 data class TokenResponse(
     @SerializedName("access_token")

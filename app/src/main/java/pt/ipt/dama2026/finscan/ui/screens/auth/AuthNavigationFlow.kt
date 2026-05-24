@@ -24,11 +24,15 @@ fun AuthNavigationFlow(
         when (screen) {
             "login" -> LoginScreen(
                 onLoginSuccess = onAuthSuccess,
-                onNavigateToRegister = { currentScreen = "register" }
+                onNavigateToRegister = { currentScreen = "register" },
+                onNavigateToForgotPassword = { currentScreen = "forgot_password" }
             )
             "register" -> RegisterScreen(
                 onRegisterSuccess = onAuthSuccess,
                 onNavigateToLogin = { currentScreen = "login" }
+            )
+            "forgot_password" -> ForgotPasswordScreen(
+                onNavigateBack = { currentScreen = "login" }
             )
         }
     }

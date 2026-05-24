@@ -84,4 +84,14 @@
     <string name="auth_unknown_error">Erro desconhecido. Contacte o administrador: aluno23692@ipt.pt</string>
     <string name="auth_error_internet">Sem ligação à internet</string>
 
+    <!-- Forgot Password Strings -->
+    <string name="forgot_password_instruction_email">Introduza o seu e-mail e enviaremos um código de 6 dígitos para redefinir a sua password.</string>
+    <string name="forgot_password_instruction_code">Introduza o código de 6 dígitos enviado para o seu e-mail e escolha uma nova password.</string>
+    <string name="forgot_password_code_sent">Código enviado! Verifique a sua caixa de entrada.</string>
+    <string name="forgot_password_code_hint">Código de 6 dígitos</string>
+    <string name="auth_send_code_button">Enviar Código</string>
+    <string name="auth_reset_password_button">Redefinir Password</string>
+    <string name="forgot_password_resend_email">Não recebeu o código? Reenviar e-mail</string>
+    <string name="forgot_password_error_invalid_code">Por favor, introduza um código de 6 dígitos válido</string>
+
 </resources>
