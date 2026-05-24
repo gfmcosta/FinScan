@@ -1,16 +1,16 @@
-import smtplib
-import ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import httpx
 from app.core.config import settings
 
 def send_reset_code_email(email_to: str, code: str):
-    message = MIMEMultipart()
-    message["From"] = settings.emails_from
-    message["To"] = email_to
-    message["Subject"] = "FinScan - Código de Recuperação"
+    url = "https://api.brevo.com/v3/smtp/email"
 
-    body = f"""
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "api-key": settings.smtp_password  # Na Brevo, a password SMTP é a API Key
+    }
+
+    html_content = f"""
     <html>
         <body style="font-family: Arial, sans-serif; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
@@ -26,33 +26,25 @@ def send_reset_code_email(email_to: str, code: str):
         </body>
     </html>
     """
-    message.attach(MIMEText(body, "html"))
 
-    # Brevo funciona melhor na porta 587 com STARTTLS
+    data = {
+        "sender": {"email": settings.emails_from, "name": "FinScan App"},
+        "to": [{"email": email_to}],
+        "subject": "FinScan - Código de Recuperação",
+        "htmlContent": html_content
+    }
+
     try:
-        print(f"Railway: Tentando enviar para {email_to} via {settings.smtp_server}:587")
-        # Usamos o contexto SSL padrão
-        context = ssl.create_default_context()
+        print(f"API Brevo: Tentando enviar e-mail para {email_to} via API HTTP...")
+        response = httpx.post(url, headers=headers, json=data, timeout=15)
 
-        with smtplib.SMTP(settings.smtp_server, 587, timeout=20) as server:
-            server.ehlo()
-            server.starttls(context=context)
-            server.ehlo()
-            server.login(settings.smtp_user, settings.smtp_password)
-            server.send_message(message)
-            print(f"Sucesso absoluto no envio para {email_to}")
-        return True
-    except Exception as e:
-        print(f"Erro no envio via 587: {str(e)}")
-        # Última tentativa na porta 2525 (Brevo suporta esta porta alternativa para evitar bloqueios)
-        try:
-            print(f"Tentando porta alternativa 2525 para {email_to}...")
-            with smtplib.SMTP(settings.smtp_server, 2525, timeout=20) as server:
-                server.starttls(context=ssl.create_default_context())
-                server.login(settings.smtp_user, settings.smtp_password)
-                server.send_message(message)
-                print(f"Sucesso via porta 2525")
+        if response.status_code in [200, 201, 202]:
+            print(f"Sucesso total via API Brevo: {response.status_code}")
             return True
-        except Exception as e2:
-            print(f"Todas as tentativas falharam (587, 465, 2525). Erro final: {str(e2)}")
+        else:
+            print(f"Erro na API Brevo ({response.status_code}): {response.text}")
             return False
+
+    except Exception as e:
+        print(f"Erro ao conectar com a API da Brevo: {str(e)}")
+        return False
