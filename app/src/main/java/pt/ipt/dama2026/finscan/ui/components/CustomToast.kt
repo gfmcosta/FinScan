@@ -10,11 +10,13 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -47,35 +49,42 @@ fun CustomToast(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(bottom = 32.dp, start = 16.dp, end = 16.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = getToastBackgroundColor(state.type),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                tonalElevation = 4.dp,
+                shadowElevation = 8.dp
             ) {
-                Icon(
-                    imageVector = getToastIcon(state.type),
-                    contentDescription = null,
-                    tint = getToastIconColor(state.type),
+                Row(
                     modifier = Modifier
-                        .size(24.dp)
-                        .padding(end = 12.dp)
-                )
+                        .fillMaxWidth()
+                        .background(
+                            color = getToastBackgroundColor(state.type)
+                        )
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Icon(
+                        imageVector = getToastIcon(state.type),
+                        contentDescription = null,
+                        tint = getToastIconColor(state.type),
+                        modifier = Modifier
+                            .size(24.dp)
+                            .padding(end = 12.dp)
+                    )
 
-                Text(
-                    text = state.message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = getToastTextColor(state.type),
-                    modifier = Modifier.weight(1f)
-                )
+                    Text(
+                        text = state.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = getToastTextColor(state.type),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }
@@ -83,11 +92,13 @@ fun CustomToast(
 
 @Composable
 private fun getToastBackgroundColor(type: ToastType): Color {
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val alpha = if (isDark) 0.25f else 0.12f
     return when (type) {
-        ToastType.SUCCESS -> EmeraldGreen.copy(alpha = 0.15f)
-        ToastType.ERROR -> Color(0xFFEF4444).copy(alpha = 0.15f)
-        ToastType.WARNING -> AmberAlert.copy(alpha = 0.15f)
-        ToastType.INFO -> IndigoTechnological.copy(alpha = 0.15f)
+        ToastType.SUCCESS -> EmeraldGreen.copy(alpha = alpha)
+        ToastType.ERROR -> Color(0xFFEF4444).copy(alpha = alpha)
+        ToastType.WARNING -> AmberAlert.copy(alpha = alpha)
+        ToastType.INFO -> IndigoTechnological.copy(alpha = alpha)
     }
 }
 

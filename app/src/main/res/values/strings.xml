@@ -20,6 +20,11 @@
     <string name="settings_language_label">Language</string>
     <string name="settings_logout_label">Logout</string>
     <string name="settings_about_us_label">About us</string>
+    <string name="settings_logout_confirm_title">Logout</string>
+    <string name="settings_logout_confirm_message">Are you sure you want to sign out?</string>
+    <string name="settings_logout_confirm_yes">Yes, Logout</string>
+    <string name="settings_logout_confirm_no">Cancel</string>
+    <string name="settings_logout_success">Logged out successfully</string>
     <string name="language_back_label">Back</string>
     <string name="language_portuguese_label">Portuguese</string>
     <string name="language_english_label">English</string>

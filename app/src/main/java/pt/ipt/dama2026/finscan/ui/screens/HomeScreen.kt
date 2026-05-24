@@ -17,11 +17,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pt.ipt.dama2026.finscan.R
+import pt.ipt.dama2026.finscan.data.datastore.AuthManager
 import pt.ipt.dama2026.finscan.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -146,7 +148,15 @@ fun PlaceholderScreen(title: String) {
 
 @Composable
 fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
-    val userName = "Costa" // TODO: Change in PROD
+    val context = LocalContext.current
+    val authManager = remember { AuthManager.getInstance(context) }
+    val userName by authManager.name.collectAsState(initial = "")
+    
+    // Obter apenas o primeiro nome
+    val firstName = remember(userName) {
+        userName?.trim()?.split("\\s+".toRegex())?.firstOrNull() ?: ""
+    }
+
     val currentDate = remember { 
         SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()) 
     }
@@ -167,7 +177,7 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
         ) {
             Column {
                 Text(
-                    text = stringResource(R.string.home_hi_title) + userName,
+                    text = stringResource(R.string.home_hi_title) + firstName,
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
