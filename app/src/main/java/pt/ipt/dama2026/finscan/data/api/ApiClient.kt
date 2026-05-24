@@ -58,32 +58,29 @@ object ApiClient {
 
     private fun authInterceptor(): Interceptor = Interceptor { chain ->
         val originalRequest = chain.request()
+        val path = originalRequest.url.encodedPath
         
         // Skip adding token if it's login or register
-        val path = originalRequest.url.encodedPath
-        if (path.endsWith("auth/login") || path.endsWith("auth/register")) {
+        if (path.contains("auth/login") || path.contains("auth/register")) {
             return@Interceptor chain.proceed(originalRequest)
         }
 
-        var authenticatedRequest = originalRequest
-
-        authManager?.let { manager ->
-            try {
-                // Get token synchronously using runBlocking (common in OkHttp interceptors with DataStore)
-                val token = runBlocking { manager.getTokenSync() }
-                
-                authenticatedRequest = originalRequest.newBuilder().apply {
-                    if (!token.isNullOrEmpty()) {
-                        addHeader("Authorization", "Bearer $token")
-                    }
-                    addHeader("Content-Type", "application/json")
-                }.build()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        val token = runBlocking {
+            authManager?.getTokenSync()
         }
 
-        chain.proceed(authenticatedRequest)
+        val requestBuilder = originalRequest.newBuilder()
+        
+        if (!token.isNullOrEmpty()) {
+            requestBuilder.header("Authorization", "Bearer $token")
+        }
+        
+        // Ensure Content-Type is set for JSON requests if not already set
+        if (originalRequest.header("Content-Type") == null) {
+            requestBuilder.header("Content-Type", "application/json")
+        }
+
+        chain.proceed(requestBuilder.build())
     }
 
     fun resetRetrofit() {

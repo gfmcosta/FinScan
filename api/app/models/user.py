@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Boolean, Column, Enum, Integer, String
+from sqlalchemy import Boolean, Column, Enum, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
@@ -22,4 +22,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean(), default=True)
     role = Column(Enum(UserRole), default=UserRole.user, nullable=False)
+    reset_code = Column(String, nullable=True)
+    reset_code_expires_at = Column(DateTime, nullable=True)
+
     receipts = relationship("Receipt", back_populates="owner")

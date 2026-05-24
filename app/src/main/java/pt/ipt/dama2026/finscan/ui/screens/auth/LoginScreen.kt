@@ -39,7 +39,8 @@ import pt.ipt.dama2026.finscan.data.datastore.AuthManager
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit = {},
-    onNavigateToRegister: () -> Unit = {}
+    onNavigateToRegister: () -> Unit = {},
+    onNavigateToForgotPassword: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -244,7 +245,7 @@ fun LoginScreen(
 
             // Forgot Password Link (opcional)
             TextButton(
-                onClick = { /* TODO: Implementar forgot password */ },
+                onClick = onNavigateToForgotPassword,
                 enabled = !isLoading
             ) {
                 Text(

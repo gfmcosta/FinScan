@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
         // Use singleton settingsManager instance
         val settingsManager = SettingsManager.getInstance(this)
         val authManager = AuthManager.getInstance(this)
+        pt.ipt.dama2026.finscan.data.api.ApiClient.initialize(this)
 
         setContent {
             // Observe settings - start with null to detect when DataStore has finished reading

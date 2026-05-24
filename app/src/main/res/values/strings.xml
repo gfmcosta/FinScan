@@ -84,4 +84,14 @@
     <string name="auth_unknown_error">Unknown error. Please contact the administrator: aluno23692@ipt.pt</string>
     <string name="auth_error_internet">No internet connection</string>
 
+    <!-- Forgot Password Strings -->
+    <string name="forgot_password_instruction_email">Enter your email address and we\'ll send you a 6-digit code to reset your password.</string>
+    <string name="forgot_password_instruction_code">Enter the 6-digit code sent to your email and choose a new password.</string>
+    <string name="forgot_password_code_sent">Code sent! Check your inbox.</string>
+    <string name="forgot_password_code_hint">6-Digit Code</string>
+    <string name="auth_send_code_button">Send Code</string>
+    <string name="auth_reset_password_button">Reset Password</string>
+    <string name="forgot_password_resend_email">Didn\'t receive the code? Resend email</string>
+    <string name="forgot_password_error_invalid_code">Please enter a valid 6-digit code</string>
+
 </resources>
