@@ -23,6 +23,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pt.ipt.dama2026.finscan.R
+import pt.ipt.dama2026.finscan.data.api.ApiClient
+import pt.ipt.dama2026.finscan.data.api.models.ExpenseStats
+import pt.ipt.dama2026.finscan.data.api.services.ReceiptApiService
 import pt.ipt.dama2026.finscan.data.datastore.AuthManager
 import pt.ipt.dama2026.finscan.ui.theme.*
 import java.text.SimpleDateFormat
@@ -155,7 +158,41 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
     val currentDate = remember { 
         SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()) 
     }
-    val monthlySpent = "450,25" //TODO: Change in PROD
+
+    val api = remember { ApiClient.getRetrofit().create(ReceiptApiService::class.java) }
+    var stats by remember { mutableStateOf<ExpenseStats?>(null) }
+    var isLoadingStats by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        try {
+            val cal = Calendar.getInstance()
+            cal.set(Calendar.DAY_OF_MONTH, 1)
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            val startFmt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val startOfMonth = startFmt.format(cal.time)
+            cal.add(Calendar.MONTH, 1)
+            val startOfNextMonth = startFmt.format(cal.time)
+            val resp = api.getStats(startDate = startOfMonth, endDate = startOfNextMonth)
+            if (resp.isSuccessful) {
+                stats = resp.body()
+            }
+        } catch (_: Exception) {}
+        isLoadingStats = false
+    }
+
+    val monthlyTotal = remember(stats) {
+        stats?.byCategory?.sumOf { it.total } ?: 0.0
+    }
+    val monthlySpent = remember(monthlyTotal) {
+        String.format("%.2f", monthlyTotal).replace(".", ",")
+    }
+
+    val topCategories = remember(stats) {
+        stats?.byCategory?.sortedByDescending { it.total }?.take(5) ?: emptyList()
+    }
 
     Column(
         modifier = Modifier
@@ -257,14 +294,23 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                // Simple Bar Chart using Canvas
-                val chartData = listOf(
-                    0.6f to EmeraldGreen,
-                    0.4f to IndigoTechnological,
-                    0.8f to AmberAlert,
-                    0.3f to Color.Magenta,
-                    0.5f to LightBlue
+                val chartColors = listOf(
+                    EmeraldGreen,
+                    IndigoTechnological,
+                    AmberAlert,
+                    Color(0xFFEC4899),
+                    LightBlue
                 )
+
+                val maxTotal = remember(topCategories) {
+                    topCategories.maxOfOrNull { it.total } ?: 1.0
+                }
+                val chartData = remember(topCategories, maxTotal) {
+                    topCategories.mapIndexed { index, cat ->
+                        (cat.total / maxTotal).toFloat() to chartColors[index % chartColors.size]
+                    }
+                }
+
                 BarChartPlaceholder(
                     data = chartData,
                     modifier = Modifier
@@ -274,18 +320,15 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Top 5 most spent categories
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // TODO: Change in PROD
-                    CategoryLegendItem("Entertainment", "120,50", EmeraldGreen)
-                    CategoryLegendItem("Restaurant", "85,20", IndigoTechnological)
-                    CategoryLegendItem("University", "200,00", AmberAlert)
-                    CategoryLegendItem("Car - Gasoline", "35,00", Color.Magenta)
-                    CategoryLegendItem("Car - Tolls", "9,55", LightBlue)
+                    topCategories.forEachIndexed { index, cat ->
+                        val amount = String.format("%.2f", cat.total).replace(".", ",")
+                        CategoryLegendItem(cat.key, amount, chartColors[index % chartColors.size])
+                    }
                 }
             }
         }

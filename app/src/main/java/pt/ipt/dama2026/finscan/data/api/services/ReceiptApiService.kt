@@ -1,5 +1,6 @@
 package pt.ipt.dama2026.finscan.data.api.services
 
+import pt.ipt.dama2026.finscan.data.api.models.ExpenseStats
 import pt.ipt.dama2026.finscan.data.api.models.ReceiptResponse
 import pt.ipt.dama2026.finscan.data.api.models.ReceiptUpdateRequest
 import retrofit2.Response
@@ -24,6 +25,12 @@ interface ReceiptApiService {
         @Path("id") id: Int,
         @Body request: ReceiptUpdateRequest
     ): Response<ReceiptResponse>
+
+    @GET("receipts/stats")
+    suspend fun getStats(
+        @Query("start_date") startDate: String? = null,
+        @Query("end_date") endDate: String? = null
+    ): Response<ExpenseStats>
 
     @DELETE("receipts/{id}")
     suspend fun deleteReceipt(
