@@ -1,6 +1,7 @@
 package pt.ipt.dama2026.finscan.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -81,9 +82,14 @@ fun CategoriesScreen(onBack: () -> Unit = {}) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier
+                    .clickable(onClick = onBack)
+                    .size(24.dp)
+            )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.categories_title),
