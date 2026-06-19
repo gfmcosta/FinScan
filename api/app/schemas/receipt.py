@@ -6,9 +6,8 @@ from pydantic import BaseModel, ConfigDict
 
 class ReceiptBase(BaseModel):
     store: str
-    category: str
+    category_id: int
     total: float
-    currency: str = "EUR"
     purchase_date: datetime
     latitude: float | None = None
     longitude: float | None = None
@@ -18,9 +17,19 @@ class ReceiptCreate(ReceiptBase):
     pass
 
 
+class ReceiptUpdate(BaseModel):
+    store: str | None = None
+    category_id: int | None = None
+    total: float | None = None
+    purchase_date: datetime | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+
+
 class ReceiptRead(ReceiptBase):
     id: int
     owner_id: int
+    category_name: str = ""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -37,7 +46,6 @@ class ReceiptOCRParsed(BaseModel):
     store: str
     category: str
     total: float
-    currency: str = "EUR"
     purchase_date: datetime
 
 

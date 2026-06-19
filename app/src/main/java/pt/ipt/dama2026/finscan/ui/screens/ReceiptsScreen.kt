@@ -1,0 +1,570 @@
+package pt.ipt.dama2026.finscan.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import pt.ipt.dama2026.finscan.R
+import pt.ipt.dama2026.finscan.data.api.ApiClient
+import pt.ipt.dama2026.finscan.data.api.models.CategoryResponse
+import pt.ipt.dama2026.finscan.data.api.models.ReceiptResponse
+import pt.ipt.dama2026.finscan.data.api.models.ReceiptUpdateRequest
+import pt.ipt.dama2026.finscan.data.api.services.CategoryApiService
+import pt.ipt.dama2026.finscan.data.api.services.ReceiptApiService
+import pt.ipt.dama2026.finscan.ui.theme.*
+import java.text.SimpleDateFormat
+import java.util.*
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReceiptsScreen() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val api = remember { ApiClient.getRetrofit().create(ReceiptApiService::class.java) }
+    val catApi = remember { ApiClient.getRetrofit().create(CategoryApiService::class.java) }
+
+    var receipts by remember { mutableStateOf(listOf<ReceiptResponse>()) }
+    var categories by remember { mutableStateOf(listOf<CategoryResponse>()) }
+    var isLoading by remember { mutableStateOf(false) }
+    var isLoadingMore by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf("") }
+    var currentSkip by remember { mutableIntStateOf(0) }
+    var hasMore by remember { mutableStateOf(true) }
+    var isFirstRender by remember { mutableStateOf(true) }
+    var showCategories by remember { mutableStateOf(false) }
+
+    var receiptToDelete by remember { mutableStateOf<ReceiptResponse?>(null) }
+    var receiptToEdit by remember { mutableStateOf<ReceiptResponse?>(null) }
+    var receiptToView by remember { mutableStateOf<ReceiptResponse?>(null) }
+
+    val listState = rememberLazyListState()
+
+    suspend fun loadCategories() {
+        try {
+            val resp = catApi.listCategories()
+            if (resp.isSuccessful) {
+                categories = resp.body() ?: emptyList()
+            }
+        } catch (_: Exception) {}
+    }
+
+    suspend fun loadReceipts(refresh: Boolean) {
+        val skip = if (refresh) 0 else currentSkip
+        if (isLoading || isLoadingMore) return
+        if (refresh) isLoading = true else isLoadingMore = true
+        errorMessage = ""
+        try {
+            val response = api.listReceipts(
+                search = searchQuery.ifBlank { null },
+                skip = skip,
+                limit = 20
+            )
+            if (response.isSuccessful) {
+                val body = response.body() ?: emptyList()
+                receipts = if (refresh) body else receipts + body
+                currentSkip = skip + body.size
+                hasMore = body.size == 20
+            } else {
+                hasMore = false
+                errorMessage = if (response.code() >= 500) {
+                    context.getString(R.string.auth_unknown_error)
+                } else {
+                    context.getString(R.string.receipts_load_error)
+                }
+            }
+        } catch (e: Exception) {
+            hasMore = false
+            errorMessage = context.getString(R.string.auth_error_internet)
+        } finally {
+            isLoading = false
+            isLoadingMore = false
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        loadCategories()
+        loadReceipts(true)
+    }
+
+    LaunchedEffect(searchQuery) {
+        if (isFirstRender) {
+            isFirstRender = false
+            return@LaunchedEffect
+        }
+        delay(400)
+        currentSkip = 0
+        hasMore = true
+        loadReceipts(true)
+    }
+
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val totalItems = listState.layoutInfo.totalItemsCount
+            if (totalItems == 0) return@derivedStateOf false
+            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            lastVisibleItem >= totalItems - 3 && hasMore && !isLoadingMore && !isLoading
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore) {
+            loadReceipts(false)
+        }
+    }
+
+    if (showCategories) {
+        CategoriesScreen(onBack = {
+            showCategories = false
+            scope.launch { loadCategories() }
+        })
+        return
+    }
+
+    if (receiptToView != null) {
+        ReceiptDetailScreen(
+            receipt = receiptToView!!,
+            onBack = { receiptToView = null }
+        )
+        return
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.receipts_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { showCategories = true }) {
+                    Icon(Icons.Default.Settings, contentDescription = "Manage categories", tint = getAdaptiveSubtext())
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(stringResource(R.string.receipts_search_hint)) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(Icons.Default.Close, contentDescription = null)
+                        }
+                    }
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = IndigoTechnological,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (errorMessage.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = AmberAlert.copy(alpha = 0.1f))
+                ) {
+                    Text(
+                        text = errorMessage,
+                        modifier = Modifier.padding(16.dp),
+                        color = AmberAlert,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            if (isLoading && receipts.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = IndigoTechnological)
+                }
+            } else if (receipts.isEmpty() && !isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.Receipt,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = getAdaptiveSubtext()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = stringResource(R.string.receipts_empty),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = getAdaptiveSubtext()
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp)
+                ) {
+                    items(receipts, key = { it.id }) { receipt ->
+                        ReceiptCard(
+                            receipt = receipt,
+                            onClick = { receiptToView = receipt },
+                            onEdit = { receiptToEdit = receipt },
+                            onDelete = { receiptToDelete = receipt }
+                        )
+                    }
+
+                    if (isLoadingMore) {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = IndigoTechnological,
+                                    strokeWidth = 2.dp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (receiptToDelete != null) {
+        val deleteTitle = stringResource(R.string.receipts_delete_title)
+        val deleteMessage = stringResource(R.string.receipts_delete_message, receiptToDelete!!.store)
+        val deleteLabel = stringResource(R.string.receipts_delete)
+        val cancelLabel = stringResource(R.string.receipts_cancel)
+        AlertDialog(
+            onDismissRequest = { receiptToDelete = null },
+            title = { Text(deleteTitle) },
+            text = { Text(deleteMessage) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val id = receiptToDelete!!.id
+                        receiptToDelete = null
+                        scope.launch {
+                            try {
+                                val resp = api.deleteReceipt(id)
+                                if (resp.isSuccessful) {
+                                    receipts = receipts.filter { it.id != id }
+                                } else {
+                                    errorMessage = if (resp.code() >= 500) {
+                                        context.getString(R.string.auth_unknown_error)
+                                    } else {
+                                        context.getString(R.string.receipts_delete_error)
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                errorMessage = context.getString(R.string.auth_error_internet)
+                            }
+                        }
+                    }
+                ) {
+                    Text(deleteLabel, color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { receiptToDelete = null }) {
+                    Text(cancelLabel)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            textContentColor = MaterialTheme.colorScheme.onSurface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface
+        )
+    }
+
+    if (receiptToEdit != null) {
+        EditReceiptDialog(
+            receipt = receiptToEdit!!,
+            categories = categories,
+            onDismiss = { receiptToEdit = null },
+            onSave = { updated ->
+                scope.launch {
+                    try {
+                        val resp = api.updateReceipt(updated.id, ReceiptUpdateRequest(
+                            store = updated.store,
+                            categoryId = updated.categoryId,
+                            total = updated.total,
+                            purchaseDate = updated.purchaseDate
+                        ))
+                        if (resp.isSuccessful) {
+                            receipts = receipts.map { if (it.id == updated.id) updated else it }
+                            receiptToEdit = null
+                        } else {
+                            errorMessage = if (resp.code() >= 500) {
+                                context.getString(R.string.auth_unknown_error)
+                            } else {
+                                context.getString(R.string.receipts_update_error)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        errorMessage = context.getString(R.string.auth_error_internet)
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun ReceiptCard(
+    receipt: ReceiptResponse,
+    onClick: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        IndigoTechnological.copy(alpha = 0.1f),
+                        RoundedCornerShape(12.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Store,
+                    contentDescription = null,
+                    tint = IndigoTechnological,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = receipt.store,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = receipt.categoryName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = IndigoTechnological
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = formatDate(receipt.purchaseDate),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = getAdaptiveSubtext()
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = String.format("%.2f€", receipt.total),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            IconButton(
+                onClick = onEdit,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = null,
+                    tint = IndigoTechnological,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = Color(0xFFEF4444),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditReceiptDialog(
+    receipt: ReceiptResponse,
+    categories: List<CategoryResponse>,
+    onDismiss: () -> Unit,
+    onSave: (ReceiptResponse) -> Unit
+) {
+    var store by remember { mutableStateOf(receipt.store) }
+    var selectedCategoryId by remember { mutableIntStateOf(receipt.categoryId) }
+    var total by remember { mutableStateOf(receipt.total.toString()) }
+    var expanded by remember { mutableStateOf(false) }
+
+    val selectedCatName = categories.find { it.id == selectedCategoryId }?.name ?: ""
+
+    val editTitle = stringResource(R.string.receipts_edit_title)
+    val storeLabel = stringResource(R.string.receipts_store_label)
+    val categoryLabel = stringResource(R.string.receipts_category_label)
+    val totalLabel = stringResource(R.string.receipts_total_label)
+    val saveLabel = stringResource(R.string.receipts_save)
+    val cancelLabel = stringResource(R.string.receipts_cancel)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(editTitle) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = store,
+                    onValueChange = { store = it },
+                    label = { Text(storeLabel) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = IndigoTechnological),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedCatName,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(categoryLabel) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = IndigoTechnological),
+                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        categories.forEach { cat ->
+                            DropdownMenuItem(
+                                text = { Text(cat.name) },
+                                onClick = {
+                                    selectedCategoryId = cat.id
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                OutlinedTextField(
+                    value = total,
+                    onValueChange = { total = it },
+                    label = { Text(totalLabel) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = IndigoTechnological),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onSave(
+                        receipt.copy(
+                            store = store,
+                            categoryId = selectedCategoryId,
+                            categoryName = selectedCatName,
+                            total = total.toDoubleOrNull() ?: receipt.total
+                        )
+                    )
+                }
+            ) {
+                Text(saveLabel, color = IndigoTechnological)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(cancelLabel)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        textContentColor = MaterialTheme.colorScheme.onSurface,
+        titleContentColor = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+private fun formatDate(dateStr: String): String {
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val date = inputFormat.parse(dateStr.substringBefore("+").substringBefore("."))
+        date?.let { outputFormat.format(it) } ?: dateStr
+    } catch (e: Exception) {
+        dateStr.take(10)
+    }
+}

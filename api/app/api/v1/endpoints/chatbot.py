@@ -27,7 +27,7 @@ def ask(
         .all()
     )
     context_lines = [
-        f"{r.purchase_date.date()} | {r.store} | {r.category} | {r.total} {r.currency}"
+        f"{r.purchase_date.date()} | {r.store} | {r.category_name} | {r.total} €"
         for r in receipts
     ]
     context = "\n".join(context_lines) if context_lines else "Sem despesas registadas."

@@ -26,3 +26,4 @@ class User(Base):
     reset_code_expires_at = Column(DateTime, nullable=True)
 
     receipts = relationship("Receipt", back_populates="owner")
+    categories = relationship("Category", back_populates="owner")

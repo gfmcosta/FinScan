@@ -15,3 +15,18 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
+
+    db = SessionLocal()
+    try:
+        existing_categories = db.query(models.Category).first()
+        if existing_categories is None:
+            default_names = [
+                "Supermarket", "Restaurant", "Fuel", "Electronics",
+                "Clothing", "Cafe", "Sports", "Transport", "Entertainment", "Other",
+            ]
+            for name in default_names:
+                db.add(models.Category(name=name, is_default=True, owner_id=None))
+            db.commit()
+
+    finally:
+        db.close()

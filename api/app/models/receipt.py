@@ -11,12 +11,16 @@ class Receipt(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     store = Column(String, index=True, nullable=False)
-    category = Column(String, index=True, nullable=False, default="other")
+    category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
     purchase_date = Column(DateTime, default=datetime.utcnow, nullable=False)
     total = Column(Float, nullable=False)
-    currency = Column(String, default="EUR", nullable=False)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
 
     owner_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     owner = relationship("User", back_populates="receipts")
+    category = relationship("Category")
+
+    @property
+    def category_name(self) -> str:
+        return self.category.name if self.category else ""

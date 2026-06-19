@@ -297,12 +297,11 @@ fun RegisterScreen(
                                     errorMessage = parsedMessage
                                 }
                             } catch (e: Exception) {
-                                e.message?.let {
-                                    if(it.contains("Unable to resolve host")){
-                                        errorMessage = context.getString(R.string.auth_error_internet)
-                                    }else{
-                                        errorMessage = e.message ?: context.getString(R.string.auth_unknown_error)
-                                    }
+                                val msg = e.message ?: ""
+                                if (msg.contains("Unable to resolve host") || msg.contains("Failed to connect") || msg.contains("Connection refused") || msg.contains("timeout")) {
+                                    errorMessage = context.getString(R.string.auth_error_internet)
+                                } else {
+                                    errorMessage = context.getString(R.string.auth_unknown_error)
                                 }
                             } finally {
                                 isLoading = false

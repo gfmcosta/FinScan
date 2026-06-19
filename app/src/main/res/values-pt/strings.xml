@@ -84,6 +84,50 @@
     <string name="auth_unknown_error">Erro desconhecido. Contacte o administrador: aluno23692@ipt.pt</string>
     <string name="auth_error_internet">Sem ligação à internet</string>
 
+    <!-- Receipts Strings -->
+    <string name="receipts_title">Recibos</string>
+    <string name="receipts_search_hint">Pesquisar por loja, categoria ou valor</string>
+    <string name="receipts_empty">Nenhum recibo encontrado</string>
+    <string name="receipts_delete_title">Eliminar Recibo</string>
+    <string name="receipts_delete_message">Tem a certeza que deseja eliminar o recibo de %s?</string>
+    <string name="receipts_delete_error">Erro ao eliminar recibo</string>
+    <string name="receipts_load_error">Erro ao carregar recibos</string>
+    <string name="receipts_edit_title">Editar Recibo</string>
+    <string name="receipts_save">Guardar</string>
+    <string name="receipts_cancel">Cancelar</string>
+    <string name="receipts_delete">Eliminar</string>
+    <string name="receipts_store_label">Loja</string>
+    <string name="receipts_category_label">Categoria</string>
+    <string name="receipts_total_label">Total</string>
+    <string name="receipts_currency_label">Moeda</string>
+    <string name="receipts_update_error">Erro ao atualizar recibo</string>
+
+    <!-- Categorias -->
+    <string name="categories_title">Categorias</string>
+    <string name="categories_new">Nova Categoria</string>
+    <string name="categories_edit">Editar Categoria</string>
+    <string name="categories_delete_title">Eliminar Categoria</string>
+    <string name="categories_delete_message">Eliminar "%s"?</string>
+    <string name="categories_delete">Eliminar</string>
+    <string name="categories_cancel">Cancelar</string>
+    <string name="categories_save">Guardar</string>
+    <string name="categories_name_label">Nome</string>
+    <string name="categories_load_error">Erro ao carregar categorias</string>
+    <string name="categories_create_error">Erro ao criar categoria</string>
+    <string name="categories_update_error">Erro ao atualizar categoria</string>
+    <string name="categories_delete_error">Erro ao eliminar categoria</string>
+    <string name="categories_delete_has_receipts">Não é possível eliminar uma categoria com recibos associados</string>
+
+    <!-- Detalhes do Recibo -->
+    <string name="receipt_detail_title">Detalhes do Recibo</string>
+    <string name="receipt_detail_store">Loja</string>
+    <string name="receipt_detail_category">Categoria</string>
+    <string name="receipt_detail_total">Total</string>
+    <string name="receipt_detail_date">Data</string>
+    <string name="receipt_detail_location">Localização</string>
+    <string name="receipt_detail_no_location">Sem dados de localização</string>
+    <string name="receipt_detail_open_maps">Abrir no Maps</string>
+
     <!-- Forgot Password Strings -->
     <string name="forgot_password_instruction_email">Introduza o seu e-mail e enviaremos um código de 6 dígitos para redefinir a sua password.</string>
     <string name="forgot_password_instruction_code">Introduza o código de 6 dígitos enviado para o seu e-mail e escolha uma nova password.</string>
