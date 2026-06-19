@@ -42,7 +42,10 @@ class AuthService(private val context: Context) {
                 response.code() == 400 -> {
                     Result.Error("Invalid request")
                 }
-                else -> {
+                response.code() >= 500 -> {
+                    Result.Error("Internal system error. Please contact the administrator.")
+                }
+            else -> {
                     val errorBody = response.errorBody()?.string()
                     Result.Error(errorBody ?: "Login failed: ${response.code()}")
                 }
@@ -90,7 +93,10 @@ class AuthService(private val context: Context) {
                 response.code() == 409 -> {
                     Result.Error("Username or email already exists")
                 }
-                else -> {
+                response.code() >= 500 -> {
+                    Result.Error("Internal system error. Please contact the administrator.")
+                }
+            else -> {
                     val errorBody = response.errorBody()?.string()
                     Result.Error(errorBody ?: "Registration failed: ${response.code()}")
                 }

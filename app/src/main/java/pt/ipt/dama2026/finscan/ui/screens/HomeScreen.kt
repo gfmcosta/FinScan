@@ -116,11 +116,6 @@ fun MainScreen() {
 }
 
 @Composable
-fun ReceiptsScreen() {
-    PlaceholderScreen("Receipts Screen")
-}
-
-@Composable
 fun ScanScreen() {
     PlaceholderScreen("Scan Screen")
 }
