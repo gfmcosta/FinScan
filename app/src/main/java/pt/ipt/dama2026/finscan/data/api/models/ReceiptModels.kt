@@ -23,6 +23,20 @@ data class ReceiptResponse(
     val ownerId: Int
 )
 
+data class GroupTotal(
+    @SerializedName("key")
+    val key: String,
+    @SerializedName("total")
+    val total: Double
+)
+
+data class ExpenseStats(
+    @SerializedName("by_category")
+    val byCategory: List<GroupTotal>,
+    @SerializedName("by_store")
+    val byStore: List<GroupTotal>
+)
+
 data class ReceiptUpdateRequest(
     @SerializedName("store")
     val store: String? = null,
