@@ -161,7 +161,6 @@ fun SettingsMainContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { /* Handle click */ }
                 .padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -192,11 +191,6 @@ fun SettingsMainContent(
                     color = getAdaptiveSubtext()
                 )
             }
-            Icon(
-                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = getAdaptiveControlColor()
-            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
