@@ -18,14 +18,29 @@ def init_db() -> None:
 
     db = SessionLocal()
     try:
+        from sqlalchemy import inspect, text
+        inspector = inspect(engine)
+        columns = [c["name"] for c in inspector.get_columns("category")]
+        if "icon" not in columns:
+            db.execute(text("ALTER TABLE category ADD COLUMN icon VARCHAR DEFAULT 'Category'"))
+            db.commit()
+
         existing_categories = db.query(models.Category).first()
         if existing_categories is None:
-            default_names = [
-                "Supermarket", "Restaurant", "Fuel", "Electronics",
-                "Clothing", "Cafe", "Sports", "Transport", "Entertainment", "Other",
+            default_categories = [
+                ("Supermarket", "ShoppingCart"),
+                ("Restaurant", "Restaurant"),
+                ("Fuel", "LocalGasStation"),
+                ("Electronics", "Devices"),
+                ("Clothing", "Checkroom"),
+                ("Cafe", "LocalCafe"),
+                ("Sports", "SportsEsports"),
+                ("Transport", "DirectionsCar"),
+                ("Entertainment", "Movie"),
+                ("Other", "Category"),
             ]
-            for name in default_names:
-                db.add(models.Category(name=name, is_default=True, owner_id=None))
+            for name, icon in default_categories:
+                db.add(models.Category(name=name, icon=icon, is_default=True, owner_id=None))
             db.commit()
 
     finally:

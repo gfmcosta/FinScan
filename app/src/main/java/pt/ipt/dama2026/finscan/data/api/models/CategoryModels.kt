@@ -7,6 +7,8 @@ data class CategoryResponse(
     val id: Int,
     @SerializedName("name")
     val name: String,
+    @SerializedName("icon")
+    val icon: String = "Category",
     @SerializedName("owner_id")
     val ownerId: Int?,
     @SerializedName("is_default")
@@ -15,10 +17,14 @@ data class CategoryResponse(
 
 data class CategoryCreateRequest(
     @SerializedName("name")
-    val name: String
+    val name: String,
+    @SerializedName("icon")
+    val icon: String = "Category"
 )
 
 data class CategoryUpdateRequest(
     @SerializedName("name")
-    val name: String
+    val name: String,
+    @SerializedName("icon")
+    val icon: String? = null
 )
