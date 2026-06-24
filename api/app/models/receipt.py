@@ -24,3 +24,7 @@ class Receipt(Base):
     @property
     def category_name(self) -> str:
         return self.category.name if self.category else ""
+
+    @property
+    def category_icon(self) -> str:
+        return self.category.icon if self.category else "Category"

@@ -101,6 +101,11 @@
     <string name="receipts_total_label">Total</string>
     <string name="receipts_currency_label">Currency</string>
     <string name="receipts_update_error">Failed to update receipt</string>
+    <string name="receipts_total_invalid">Enter a valid number</string>
+    <string name="receipts_create_title">New Receipt</string>
+    <string name="receipts_create_error">Failed to create receipt</string>
+    <string name="receipts_date_label">Date</string>
+    <string name="receipts_store_required">Store name is required</string>
 
     <!-- Categories Strings -->
     <string name="categories_title">Categories</string>
@@ -117,6 +122,8 @@
     <string name="categories_update_error">Failed to update category</string>
     <string name="categories_delete_error">Failed to delete category</string>
     <string name="categories_delete_has_receipts">Cannot delete category with existing receipts</string>
+    <string name="categories_name_invalid">Category name cannot contain numbers</string>
+    <string name="categories_icon_label">Icon</string>
 
     <!-- Receipt Detail Strings -->
     <string name="receipt_detail_title">Receipt Details</string>

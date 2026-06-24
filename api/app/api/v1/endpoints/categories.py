@@ -43,7 +43,12 @@ def create_category(
     )
     if existing:
         raise HTTPException(status_code=400, detail="Category already exists")
-    category = Category(name=payload.name, owner_id=current_user.id, is_default=False)
+    category = Category(
+        name=payload.name,
+        icon=payload.icon,
+        owner_id=current_user.id,
+        is_default=False,
+    )
     db.add(category)
     db.commit()
     db.refresh(category)
@@ -63,6 +68,8 @@ def update_category(
     if category.owner_id is not None and category.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your category")
     category.name = payload.name
+    if payload.icon is not None:
+        category.icon = payload.icon
     db.commit()
     db.refresh(category)
     return category

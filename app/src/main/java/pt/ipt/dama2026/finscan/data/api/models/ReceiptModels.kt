@@ -11,6 +11,8 @@ data class ReceiptResponse(
     val categoryId: Int,
     @SerializedName("category_name")
     val categoryName: String,
+    @SerializedName("category_icon")
+    val categoryIcon: String = "Category",
     @SerializedName("total")
     val total: Double,
     @SerializedName("purchase_date")
@@ -35,6 +37,21 @@ data class ExpenseStats(
     val byCategory: List<GroupTotal>,
     @SerializedName("by_store")
     val byStore: List<GroupTotal>
+)
+
+data class ReceiptCreateRequest(
+    @SerializedName("store")
+    val store: String,
+    @SerializedName("category_id")
+    val categoryId: Int,
+    @SerializedName("total")
+    val total: Double,
+    @SerializedName("purchase_date")
+    val purchaseDate: String,
+    @SerializedName("latitude")
+    val latitude: Double? = null,
+    @SerializedName("longitude")
+    val longitude: Double? = null
 )
 
 data class ReceiptUpdateRequest(

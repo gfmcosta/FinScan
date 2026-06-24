@@ -1,6 +1,7 @@
 package pt.ipt.dama2026.finscan.data.api.services
 
 import pt.ipt.dama2026.finscan.data.api.models.ExpenseStats
+import pt.ipt.dama2026.finscan.data.api.models.ReceiptCreateRequest
 import pt.ipt.dama2026.finscan.data.api.models.ReceiptResponse
 import pt.ipt.dama2026.finscan.data.api.models.ReceiptUpdateRequest
 import retrofit2.Response
@@ -14,6 +15,9 @@ interface ReceiptApiService {
         @Query("skip") skip: Int = 0,
         @Query("limit") limit: Int = 20,
     ): Response<List<ReceiptResponse>>
+
+    @POST("receipts")
+    suspend fun createReceipt(@Body request: ReceiptCreateRequest): Response<ReceiptResponse>
 
     @GET("receipts/{id}")
     suspend fun getReceipt(

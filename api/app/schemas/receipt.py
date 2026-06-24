@@ -30,6 +30,7 @@ class ReceiptRead(ReceiptBase):
     id: int
     owner_id: int
     category_name: str = ""
+    category_icon: str = "Category"
 
     model_config = ConfigDict(from_attributes=True)
 
