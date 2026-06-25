@@ -26,6 +26,7 @@ class AuthManager private constructor(private val context: Context) {
         }
 
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
+        private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
         private val USERNAME_KEY = stringPreferencesKey("auth_username")
         private val NAME_KEY = stringPreferencesKey("auth_name")
     }
@@ -33,6 +34,10 @@ class AuthManager private constructor(private val context: Context) {
     // Flow para observar o token
     val authToken: Flow<String?> = context.authDataStore.data.map { preferences ->
         preferences[TOKEN_KEY]
+    }
+
+    val refreshToken: Flow<String?> = context.authDataStore.data.map { preferences ->
+        preferences[REFRESH_TOKEN_KEY]
     }
 
     // Flow para observar o username
@@ -51,11 +56,20 @@ class AuthManager private constructor(private val context: Context) {
     }
 
     // Guardar token após login
-    suspend fun saveToken(token: String, username: String, name: String? = null) {
+    suspend fun saveToken(token: String, username: String, name: String? = null, refreshToken: String? = null) {
         context.authDataStore.edit { preferences ->
             preferences[TOKEN_KEY] = token
             preferences[USERNAME_KEY] = username
             name?.let { preferences[NAME_KEY] = it }
+            refreshToken?.let { preferences[REFRESH_TOKEN_KEY] = it }
+        }
+    }
+
+    // Atualizar apenas os tokens (usado no refresh silencioso)
+    suspend fun updateTokens(accessToken: String, refreshToken: String) {
+        context.authDataStore.edit { preferences ->
+            preferences[TOKEN_KEY] = accessToken
+            preferences[REFRESH_TOKEN_KEY] = refreshToken
         }
     }
 
@@ -63,8 +77,17 @@ class AuthManager private constructor(private val context: Context) {
     suspend fun clearAuth() {
         context.authDataStore.edit { preferences ->
             preferences.remove(TOKEN_KEY)
+            preferences.remove(REFRESH_TOKEN_KEY)
             preferences.remove(USERNAME_KEY)
             preferences.remove(NAME_KEY)
+        }
+    }
+
+    suspend fun getRefreshTokenSync(): String? {
+        return try {
+            refreshToken.first()
+        } catch (e: Exception) {
+            null
         }
     }
 

@@ -92,18 +92,31 @@ def scan_receipt(
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> Receipt:
-    parsed = parse_receipt_with_gemini(payload.image_base64, payload.mime_type)
+    existing_categories = (
+        db.query(Category.name)
+        .filter(or_(Category.owner_id == current_user.id, Category.is_default == True))
+        .all()
+    )
+    existing_category_names = [row.name for row in existing_categories]
+
+    parsed = parse_receipt_with_gemini(
+        payload.image_base64,
+        payload.mime_type,
+        existing_categories=existing_category_names or None,
+    )
+
+    category_name = parsed.category.capitalize()
 
     category = (
         db.query(Category)
         .filter(
-            Category.name == parsed.category,
+            Category.name == category_name,
             or_(Category.owner_id == current_user.id, Category.is_default == True),
         )
         .first()
     )
     if not category:
-        category = Category(name=parsed.category, owner_id=current_user.id, is_default=False)
+        category = Category(name=category_name, owner_id=current_user.id, is_default=False)
         db.add(category)
         db.flush()
 

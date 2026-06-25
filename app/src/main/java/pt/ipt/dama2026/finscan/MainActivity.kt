@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -75,10 +76,14 @@ class MainActivity : ComponentActivity() {
                     settingsManager.updateResourceLocale(currentLanguage)
                 }
 
-                // Wrap everything with updated configuration and context
+                // Wrap everything with updated configuration and context.
+                // Also re-provide LocalActivityResultRegistryOwner because overriding
+                // LocalContext with a ContextWrapper drops it during recomposition.
+                val activity = this@MainActivity
                 CompositionLocalProvider(
                     LocalConfiguration provides configuration,
-                    LocalContext provides wrappedContext
+                    LocalContext provides wrappedContext,
+                    LocalActivityResultRegistryOwner provides activity
                 ) {
                     FinScanTheme(darkTheme = useDarkMode) {
                         MainApp(authManager)

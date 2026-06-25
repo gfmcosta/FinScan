@@ -48,10 +48,17 @@ data class ResetPasswordRequest(
 data class TokenResponse(
     @SerializedName("access_token")
     val accessToken: String,
+    @SerializedName("refresh_token")
+    val refreshToken: String,
     @SerializedName("token_type")
     val tokenType: String = "bearer",
     @SerializedName("name")
     val name: String? = null
+)
+
+data class RefreshTokenRequest(
+    @SerializedName("refresh_token")
+    val refreshToken: String
 )
 
 data class UserResponse(

@@ -9,9 +9,9 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_user
 from app.models.user import User
-from app.schemas.token import Token
+from app.schemas.token import Token, RefreshRequest
 from app.schemas.user import UserCreate, UserRead, ChangePasswordRequest, ForgotPasswordRequest, ResetPasswordRequest
-from app.security.jwt import create_access_token
+from app.security.jwt import create_access_token, create_refresh_token, decode_refresh_token
 from app.security.password import get_password_hash, verify_password
 from app.services.email_service import send_reset_code_email
 
@@ -83,8 +83,9 @@ def login(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid email format",
         )
-    token = create_access_token(subject=user.username, role=user.role.value)
-    return Token(access_token=token, name=user.name)
+    access_token = create_access_token(subject=user.username, role=user.role.value)
+    refresh_token = create_refresh_token(subject=user.username, role=user.role.value)
+    return Token(access_token=access_token, refresh_token=refresh_token, name=user.name)
 
 
 @router.post("/change-password", status_code=status.HTTP_200_OK)
@@ -174,3 +175,23 @@ def reset_password(
     db.commit()
 
     return {"detail": "Password reset successfully"}
+
+@router.post("/refresh")
+def refresh(
+    payload: RefreshRequest,
+    db: Annotated[Session, Depends(get_db)],
+) -> Token:
+    try:
+        token_data = decode_refresh_token(payload.refresh_token)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token",
+        )
+    user = db.query(User).filter(User.username == token_data.sub).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+
+    access_token = create_access_token(subject=user.username, role=user.role.value)
+    new_refresh_token = create_refresh_token(subject=user.username, role=user.role.value)
+    return Token(access_token=access_token, refresh_token=new_refresh_token, name=user.name)

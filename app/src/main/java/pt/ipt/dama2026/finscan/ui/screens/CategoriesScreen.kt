@@ -77,20 +77,26 @@ fun CategoriesScreen(onBack: () -> Unit = {}) {
     val scope = rememberCoroutineScope()
     val api = remember { ApiClient.getRetrofit().create(CategoryApiService::class.java) }
 
+    val PAGE_SIZE = 10
+
     var categories by remember { mutableStateOf(listOf<CategoryResponse>()) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var showCreateDialog by remember { mutableStateOf(false) }
     var categoryToEdit by remember { mutableStateOf<CategoryResponse?>(null) }
     var categoryToDelete by remember { mutableStateOf<CategoryResponse?>(null) }
+    var currentPage by remember { mutableIntStateOf(1) }
+    var hasNextPage by remember { mutableStateOf(false) }
 
-    suspend fun loadCategories() {
+    suspend fun loadPage(page: Int) {
         isLoading = true
         errorMessage = ""
         try {
-            val resp = api.listCategories()
+            val resp = api.listCategories(skip = (page - 1) * PAGE_SIZE, limit = PAGE_SIZE + 1)
             if (resp.isSuccessful) {
-                categories = resp.body() ?: emptyList()
+                val body = resp.body() ?: emptyList()
+                hasNextPage = body.size > PAGE_SIZE
+                categories = if (hasNextPage) body.dropLast(1) else body
             } else {
                 errorMessage = context.getString(R.string.categories_load_error)
             }
@@ -101,7 +107,7 @@ fun CategoriesScreen(onBack: () -> Unit = {}) {
         }
     }
 
-    LaunchedEffect(Unit) { loadCategories() }
+    LaunchedEffect(Unit) { loadPage(1) }
 
     Column(
         modifier = Modifier
@@ -158,7 +164,8 @@ fun CategoriesScreen(onBack: () -> Unit = {}) {
         } else {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
+                contentPadding = PaddingValues(bottom = 8.dp),
+                modifier = Modifier.weight(1f)
             ) {
                 items(categories, key = { it.id }) { cat ->
                     CategoryRow(
@@ -166,6 +173,42 @@ fun CategoriesScreen(onBack: () -> Unit = {}) {
                         onEdit = { categoryToEdit = cat },
                         onDelete = { categoryToDelete = cat }
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = {
+                        val prev = currentPage - 1
+                        currentPage = prev
+                        scope.launch { loadPage(prev) }
+                    },
+                    enabled = currentPage > 1
+                ) {
+                    Icon(Icons.Default.ChevronLeft, contentDescription = null)
+                    Text(stringResource(R.string.pagination_prev))
+                }
+                Text(
+                    text = stringResource(R.string.pagination_page, currentPage),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                TextButton(
+                    onClick = {
+                        val next = currentPage + 1
+                        currentPage = next
+                        scope.launch { loadPage(next) }
+                    },
+                    enabled = hasNextPage
+                ) {
+                    Text(stringResource(R.string.pagination_next))
+                    Icon(Icons.Default.ChevronRight, contentDescription = null)
                 }
             }
         }
@@ -183,7 +226,7 @@ fun CategoriesScreen(onBack: () -> Unit = {}) {
                         val resp = api.createCategory(CategoryCreateRequest(name, icon))
                         if (resp.isSuccessful) {
                             showCreateDialog = false
-                            loadCategories()
+                            loadPage(currentPage)
                         } else {
                             val detail = parseErrorBody(resp.errorBody())
                             errorMessage = if (detail != null) detail else context.getString(R.string.categories_create_error)
@@ -209,7 +252,7 @@ fun CategoriesScreen(onBack: () -> Unit = {}) {
                     try {
                         val resp = api.updateCategory(id, CategoryUpdateRequest(name, icon))
                         if (resp.isSuccessful) {
-                            loadCategories()
+                            loadPage(currentPage)
                         } else {
                             val detail = parseErrorBody(resp.errorBody())
                             errorMessage = if (detail != null) detail else context.getString(R.string.categories_update_error)
@@ -240,7 +283,7 @@ fun CategoriesScreen(onBack: () -> Unit = {}) {
                             try {
                                 val resp = api.deleteCategory(id)
                                 if (resp.isSuccessful) {
-                                    loadCategories()
+                                    loadPage(currentPage)
                                 } else {
                                     val detail = parseErrorBody(resp.errorBody())
                                     errorMessage = if (detail != null) detail else context.getString(R.string.categories_delete_error)

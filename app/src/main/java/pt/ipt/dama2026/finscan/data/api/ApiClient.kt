@@ -2,17 +2,20 @@ package pt.ipt.dama2026.finscan.data.api
 
 import android.content.Context
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.flow.first
+import okhttp3.Authenticator
 import okhttp3.OkHttpClient
 import okhttp3.Interceptor
+import okhttp3.Request
+import okhttp3.Route
 import okhttp3.logging.HttpLoggingInterceptor
+import pt.ipt.dama2026.finscan.data.api.models.RefreshTokenRequest
+import pt.ipt.dama2026.finscan.data.api.services.AuthApiService
 import pt.ipt.dama2026.finscan.data.datastore.AuthManager
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-    // Change this to your API backend URL
     //    private const val BASE_URL = "https://finscan-production.up.railway.app/api/v1/"
     private const val BASE_URL = "http://10.0.2.2:8000/api/v1/"
 
@@ -33,16 +36,13 @@ object ApiClient {
     private fun buildRetrofit(): Retrofit {
         val httpClientBuilder = OkHttpClient.Builder()
 
-        // Add logging interceptor for debugging
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
         httpClientBuilder.addInterceptor(loggingInterceptor)
-
-        // Add auth interceptor to add Bearer token to requests
         httpClientBuilder.addInterceptor(authInterceptor())
+        httpClientBuilder.authenticator(tokenAuthenticator())
 
-        // Configure timeouts
         httpClientBuilder.connectTimeout(30, TimeUnit.SECONDS)
         httpClientBuilder.readTimeout(30, TimeUnit.SECONDS)
         httpClientBuilder.writeTimeout(30, TimeUnit.SECONDS)
@@ -57,28 +57,79 @@ object ApiClient {
     private fun authInterceptor(): Interceptor = Interceptor { chain ->
         val originalRequest = chain.request()
         val path = originalRequest.url.encodedPath
-        
-        // Skip adding token if it's login or register
-        if (path.contains("auth/login") || path.contains("auth/register")) {
+
+        if (path.contains("auth/login") || path.contains("auth/register") || path.contains("auth/refresh")) {
             return@Interceptor chain.proceed(originalRequest)
         }
 
-        val token = runBlocking {
-            authManager?.getTokenSync()
-        }
+        val token = runBlocking { authManager?.getTokenSync() }
 
         val requestBuilder = originalRequest.newBuilder()
-        
         if (!token.isNullOrEmpty()) {
             requestBuilder.header("Authorization", "Bearer $token")
         }
-        
-        // Ensure Content-Type is set for JSON requests if not already set
         if (originalRequest.header("Content-Type") == null) {
             requestBuilder.header("Content-Type", "application/json")
         }
-
         chain.proceed(requestBuilder.build())
+    }
+
+    /**
+     * Called automatically by OkHttp on every 401 response.
+     * Tries to get a new access token using the stored refresh token.
+     * If the refresh succeeds, the original request is retried transparently.
+     * If the refresh fails (expired/invalid), auth is cleared → UI navigates to login.
+     */
+    private fun tokenAuthenticator(): Authenticator = object : Authenticator {
+        override fun authenticate(route: Route?, response: okhttp3.Response): Request? {
+            // Don't retry if the failing request was already a refresh attempt
+            val path = response.request.url.encodedPath
+            if (path.contains("auth/refresh") || path.contains("auth/login")) return null
+
+            // Don't retry more than once (priorResponse means we already tried)
+            if (response.priorResponse != null) return null
+
+            val refreshToken = runBlocking { authManager?.getRefreshTokenSync() }
+                ?: run {
+                    runBlocking { authManager?.clearAuth() }
+                    return null
+                }
+
+            // Use a plain client (no authenticator) to call the refresh endpoint
+            val plainClient = OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .build()
+
+            val refreshRetrofit = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(plainClient)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+            val newTokens = runBlocking {
+                try {
+                    refreshRetrofit.create(AuthApiService::class.java)
+                        .refreshToken(RefreshTokenRequest(refreshToken))
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
+            val body = newTokens?.takeIf { it.isSuccessful }?.body()
+            if (body == null) {
+                // Refresh failed — force re-login
+                runBlocking { authManager?.clearAuth() }
+                return null
+            }
+
+            // Save new tokens and retry original request
+            runBlocking { authManager?.updateTokens(body.accessToken, body.refreshToken) }
+
+            return response.request.newBuilder()
+                .header("Authorization", "Bearer ${body.accessToken}")
+                .build()
+        }
     }
 
     fun resetRetrofit() {

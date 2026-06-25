@@ -97,30 +97,30 @@ fun MainScreen() {
         }
     }
     ) { paddingValues ->
-        // Use AnimatedContent for smoother transitions between screens
         Box(modifier = Modifier.padding(paddingValues)) {
-            AnimatedContent(
-                targetState = selectedItem,
-                transitionSpec = {
-                    fadeIn() togetherWith fadeOut()
-                },
-                label = "ScreenTransition"
-            ) { targetIndex ->
-                when (targetIndex) {
-                    0 -> HomeScreen(onNavigateToSettings = { selectedItem = 4 })
-                    1 -> ReceiptsScreen()
-                    2 -> ScanScreen()
-                    3 -> ReportsScreen()
-                    4 -> SettingsScreen()
+            // ScanScreen uses rememberLauncherForActivityResult which needs
+            // LocalActivityResultRegistryOwner — keep it outside AnimatedContent
+            // to avoid the sub-composition scope losing the owner.
+            if (selectedItem == 2) {
+                ScanScreen()
+            } else {
+                AnimatedContent(
+                    targetState = selectedItem,
+                    transitionSpec = {
+                        fadeIn() togetherWith fadeOut()
+                    },
+                    label = "ScreenTransition"
+                ) { targetIndex ->
+                    when (targetIndex) {
+                        0 -> HomeScreen(onNavigateToSettings = { selectedItem = 4 })
+                        1 -> ReceiptsScreen()
+                        3 -> ReportsScreen()
+                        4 -> SettingsScreen()
+                    }
                 }
             }
         }
     }
-}
-
-@Composable
-fun ScanScreen() {
-    PlaceholderScreen("Scan Screen")
 }
 
 @Composable

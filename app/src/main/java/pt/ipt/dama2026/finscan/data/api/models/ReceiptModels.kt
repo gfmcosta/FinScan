@@ -54,6 +54,17 @@ data class ReceiptCreateRequest(
     val longitude: Double? = null
 )
 
+data class ReceiptOCRRequest(
+    @SerializedName("image_base64")
+    val imageBase64: String,
+    @SerializedName("mime_type")
+    val mimeType: String = "image/jpeg",
+    @SerializedName("latitude")
+    val latitude: Double? = null,
+    @SerializedName("longitude")
+    val longitude: Double? = null
+)
+
 data class ReceiptUpdateRequest(
     @SerializedName("store")
     val store: String? = null,

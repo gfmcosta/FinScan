@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -18,11 +18,15 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 def list_categories(
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
+    skip: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 10,
 ) -> list[Category]:
     return (
         db.query(Category)
         .filter(or_(Category.owner_id == current_user.id, Category.is_default == True))
         .order_by(Category.is_default.desc(), Category.name)
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 

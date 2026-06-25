@@ -13,22 +13,43 @@ from app.core.config import settings
 from app.schemas.receipt import ReceiptOCRParsed
 
 
-PROMPT = """
-Extrai dados do recibo e devolve APENAS JSON válido com este formato:
+BASE_PROMPT = """
+Analisa a imagem e determina se é um recibo/fatura/talão de compra.
+
+Se NÃO for um recibo, devolve APENAS:
+{"error": "not_a_receipt"}
+
+Se FOR um recibo, extrai os dados e devolve APENAS JSON válido com este formato:
 {
   "store": "nome loja",
-  "category": "alimentacao|combustivel|saude|lazer|transportes|casa|outros",
+  "category": "nome da categoria",
   "total": 12.34,
   "currency": "EUR",
-    "purchase_date": "2026-04-09T12:30:00"
+  "purchase_date": "2026-04-09T12:30:00"
 }
 
 Regras:
 - Sem markdown, sem explicações, só JSON.
-- Usa categoria "outros" se não conseguires inferir.
 - `total` deve ser número decimal.
 - Usa formato ISO 8601 para `purchase_date`.
 """.strip()
+
+
+def _build_prompt(existing_categories: list[str] | None = None) -> str:
+    if existing_categories:
+        cats = ", ".join(f'"{c}"' for c in existing_categories)
+        return (
+            BASE_PROMPT
+            + f"\n- O utilizador já tem estas categorias: [{cats}]. "
+            "Escolhe a mais adequada ao recibo. "
+            "Só cria uma nova se nenhuma se aplicar.\n"
+            "- Se criares uma nova, escreve com a primeira letra maiúscula."
+        )
+    return (
+        BASE_PROMPT
+        + "\n- Usa categoria \"Outros\" se não conseguires inferir."
+        "\n- Escreve a categoria com a primeira letra maiúscula."
+    )
 
 
 def _extract_json_block(text: str) -> dict:
@@ -49,7 +70,11 @@ def _parse_data_uri(payload: str) -> tuple[str | None, str]:
     return None, payload
 
 
-def parse_receipt_with_gemini(file_base64: str, mime_type: str = "image/jpeg") -> ReceiptOCRParsed:
+def parse_receipt_with_gemini(
+    file_base64: str,
+    mime_type: str = "image/jpeg",
+    existing_categories: list[str] | None = None,
+) -> ReceiptOCRParsed:
     detected_mime, raw_payload = _parse_data_uri(file_base64)
     effective_mime = (detected_mime or mime_type or "image/jpeg").lower()
 
@@ -76,7 +101,7 @@ def parse_receipt_with_gemini(file_base64: str, mime_type: str = "image/jpeg") -
     try:
         response = model.generate_content(
             [
-                PROMPT,
+                _build_prompt(existing_categories),
                 {"mime_type": effective_mime, "data": raw_payload},
             ]
         )
@@ -99,9 +124,16 @@ def parse_receipt_with_gemini(file_base64: str, mime_type: str = "image/jpeg") -
 
     try:
         payload = _extract_json_block(response.text or "")
+        if payload.get("error") == "not_a_receipt":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="not_a_receipt",
+            )
         if "purchase_date" not in payload:
             payload["purchase_date"] = datetime.now(UTC).isoformat()
         return ReceiptOCRParsed(**payload)
+    except HTTPException:
+        raise
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
