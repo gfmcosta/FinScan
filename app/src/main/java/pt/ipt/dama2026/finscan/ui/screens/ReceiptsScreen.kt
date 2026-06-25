@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -43,14 +42,15 @@ fun ReceiptsScreen() {
     val api = remember { ApiClient.getRetrofit().create(ReceiptApiService::class.java) }
     val catApi = remember { ApiClient.getRetrofit().create(CategoryApiService::class.java) }
 
+    val PAGE_SIZE = 10
+
     var receipts by remember { mutableStateOf(listOf<ReceiptResponse>()) }
     var categories by remember { mutableStateOf(listOf<CategoryResponse>()) }
     var isLoading by remember { mutableStateOf(false) }
-    var isLoadingMore by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf("") }
-    var currentSkip by remember { mutableIntStateOf(0) }
-    var hasMore by remember { mutableStateOf(true) }
+    var currentPage by remember { mutableIntStateOf(1) }
+    var hasNextPage by remember { mutableStateOf(false) }
     var isFirstRender by remember { mutableStateOf(true) }
     var showCategories by remember { mutableStateOf(false) }
     var showCreateDialog by remember { mutableStateOf(false) }
@@ -59,35 +59,30 @@ fun ReceiptsScreen() {
     var receiptToEdit by remember { mutableStateOf<ReceiptResponse?>(null) }
     var receiptToView by remember { mutableStateOf<ReceiptResponse?>(null) }
 
-    val listState = rememberLazyListState()
-
     suspend fun loadCategories() {
         try {
-            val resp = catApi.listCategories()
+            val resp = catApi.listCategories(skip = 0, limit = 100)
             if (resp.isSuccessful) {
                 categories = resp.body() ?: emptyList()
             }
         } catch (_: Exception) {}
     }
 
-    suspend fun loadReceipts(refresh: Boolean) {
-        val skip = if (refresh) 0 else currentSkip
-        if (isLoading || isLoadingMore) return
-        if (refresh) isLoading = true else isLoadingMore = true
+    suspend fun loadPage(page: Int) {
+        if (isLoading) return
+        isLoading = true
         errorMessage = ""
         try {
             val response = api.listReceipts(
                 search = searchQuery.ifBlank { null },
-                skip = skip,
-                limit = 20
+                skip = (page - 1) * PAGE_SIZE,
+                limit = PAGE_SIZE + 1
             )
             if (response.isSuccessful) {
                 val body = response.body() ?: emptyList()
-                receipts = if (refresh) body else receipts + body
-                currentSkip = skip + body.size
-                hasMore = body.size == 20
+                hasNextPage = body.size > PAGE_SIZE
+                receipts = if (hasNextPage) body.dropLast(1) else body
             } else {
-                hasMore = false
                 errorMessage = if (response.code() >= 500) {
                     context.getString(R.string.auth_unknown_error)
                 } else {
@@ -95,17 +90,15 @@ fun ReceiptsScreen() {
                 }
             }
         } catch (e: Exception) {
-            hasMore = false
             errorMessage = context.getString(R.string.auth_error_internet)
         } finally {
             isLoading = false
-            isLoadingMore = false
         }
     }
 
     LaunchedEffect(Unit) {
         loadCategories()
-        loadReceipts(true)
+        loadPage(1)
     }
 
     LaunchedEffect(searchQuery) {
@@ -114,24 +107,8 @@ fun ReceiptsScreen() {
             return@LaunchedEffect
         }
         delay(400)
-        currentSkip = 0
-        hasMore = true
-        loadReceipts(true)
-    }
-
-    val shouldLoadMore by remember {
-        derivedStateOf {
-            val totalItems = listState.layoutInfo.totalItemsCount
-            if (totalItems == 0) return@derivedStateOf false
-            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisibleItem >= totalItems - 3 && hasMore && !isLoadingMore && !isLoading
-        }
-    }
-
-    LaunchedEffect(shouldLoadMore) {
-        if (shouldLoadMore) {
-            loadReceipts(false)
-        }
+        currentPage = 1
+        loadPage(1)
     }
 
     if (showCategories) {
@@ -249,9 +226,9 @@ fun ReceiptsScreen() {
                 }
             } else {
                 LazyColumn(
-                    state = listState,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 24.dp)
+                    contentPadding = PaddingValues(bottom = 8.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
                     items(receipts, key = { it.id }) { receipt ->
                         ReceiptCard(
@@ -261,20 +238,41 @@ fun ReceiptsScreen() {
                             onDelete = { receiptToDelete = receipt }
                         )
                     }
+                }
 
-                    if (isLoadingMore) {
-                        item {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = IndigoTechnological,
-                                    strokeWidth = 2.dp
-                                )
-                            }
-                        }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = {
+                            val prev = currentPage - 1
+                            currentPage = prev
+                            scope.launch { loadPage(prev) }
+                        },
+                        enabled = currentPage > 1
+                    ) {
+                        Icon(Icons.Default.ChevronLeft, contentDescription = null)
+                        Text(stringResource(R.string.pagination_prev))
+                    }
+                    Text(
+                        text = stringResource(R.string.pagination_page, currentPage),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    TextButton(
+                        onClick = {
+                            val next = currentPage + 1
+                            currentPage = next
+                            scope.launch { loadPage(next) }
+                        },
+                        enabled = hasNextPage
+                    ) {
+                        Text(stringResource(R.string.pagination_next))
+                        Icon(Icons.Default.ChevronRight, contentDescription = null)
                     }
                 }
             }
@@ -337,7 +335,8 @@ fun ReceiptsScreen() {
                         val resp = api.createReceipt(request)
                         if (resp.isSuccessful) {
                             showCreateDialog = false
-                            loadReceipts(true)
+                            currentPage = 1
+                            loadPage(1)
                         } else {
                             errorMessage = context.getString(R.string.receipts_create_error)
                         }

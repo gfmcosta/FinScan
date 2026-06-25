@@ -157,4 +157,9 @@
     <string name="forgot_password_resend_email">Não recebeu o código? Reenviar e-mail</string>
     <string name="forgot_password_error_invalid_code">Por favor, introduza um código de 6 dígitos válido</string>
 
+    <!-- Paginação -->
+    <string name="pagination_prev">Anterior</string>
+    <string name="pagination_next">Próxima</string>
+    <string name="pagination_page">Página %d</string>
+
 </resources>
