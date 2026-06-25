@@ -136,6 +136,10 @@
     <string name="receipt_detail_open_maps">Open in Maps</string>
 
     <!-- Scan Strings -->
+    <string name="scan_location_permission_title">Location Access</string>
+    <string name="scan_location_permission_rationale">FinScan uses your location to record where each receipt was scanned.</string>
+    <string name="scan_grant_location">Allow Location</string>
+    <string name="scan_skip_location">Skip</string>
     <string name="scan_permission_title">Camera Access Required</string>
     <string name="scan_permission_rationale">FinScan needs camera access to scan and analyse your receipts automatically.</string>
     <string name="scan_grant_permission">Allow Camera</string>
