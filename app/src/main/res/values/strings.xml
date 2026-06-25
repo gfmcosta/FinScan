@@ -7,6 +7,7 @@
     <string name="settings_label">Settings</string>
     <string name="home_monthly_spent_title">This month you have already spent</string>
     <string name="home_category_spent_title">Top 5 most spent categories</string>
+    <string name="home_no_data">No data to display</string>
     <string name="home_hi_title">Hi, </string>
     <string name="splash_tag_line">Scan your receipts easily</string>
     <string name="splash_loading_text">Preparing…</string>
@@ -53,7 +54,8 @@
     <string name="auth_login_subtitle">Sign in to your account</string>
     <string name="auth_register_title">Create Account</string>
     <string name="auth_register_subtitle">Join FinScan today</string>
-    <string name="auth_register_success">Registration successful! Redirecting to Login…</string>
+    <string name="auth_register_success">Registration successful! Check your email to verify your account.</string>
+    <string name="auth_error_email_not_verified">Please verify your email before logging in. Check your inbox.</string>
     <string name="auth_username_hint">Username</string>
     <string name="auth_name_hint">Full Name</string>
     <string name="auth_email_hint">Email</string>
@@ -169,5 +171,28 @@
     <string name="pagination_prev">Previous</string>
     <string name="pagination_next">Next</string>
     <string name="pagination_page">Page %d</string>
+
+
+    <!-- Picker shared strings -->
+    <string name="pick_source_title">Choose source</string>
+    <string name="pick_gallery">Gallery</string>
+    <string name="pick_files">Files</string>
+
+    <!-- Edit Profile -->
+    <string name="edit_profile_title">Edit Profile</string>
+    <string name="edit_profile_name_label">Full Name</string>
+    <string name="edit_profile_email_label">Email</string>
+    <string name="edit_profile_username_label">Username</string>
+    <string name="edit_profile_username_hint">Cannot be changed</string>
+    <string name="edit_profile_save">Save Changes</string>
+    <string name="edit_profile_success">Profile updated successfully</string>
+    <string name="edit_profile_error">Failed to update profile</string>
+    <string name="edit_profile_name_empty">Name cannot be empty</string>
+    <string name="edit_profile_email_invalid">Please enter a valid email</string>
+    <string name="edit_profile_username_empty">Username cannot be empty</string>
+    <string name="edit_profile_username_taken">This username is already taken</string>
+    <string name="edit_profile_email_taken">This email is already in use</string>
+    <string name="edit_profile_email_pending">Confirmation sent to %s. Click the link in the email to apply the change.</string>
+    <string name="edit_profile_remove_photo">Remove photo</string>
 
 </resources>

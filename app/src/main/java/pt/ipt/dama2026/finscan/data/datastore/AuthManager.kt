@@ -29,6 +29,8 @@ class AuthManager private constructor(private val context: Context) {
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
         private val USERNAME_KEY = stringPreferencesKey("auth_username")
         private val NAME_KEY = stringPreferencesKey("auth_name")
+        private val EMAIL_KEY = stringPreferencesKey("auth_email")
+        private val AVATAR_KEY = stringPreferencesKey("auth_avatar")
     }
 
     // Flow para observar o token
@@ -50,18 +52,48 @@ class AuthManager private constructor(private val context: Context) {
         preferences[NAME_KEY]
     }
 
+    val email: Flow<String?> = context.authDataStore.data.map { preferences ->
+        preferences[EMAIL_KEY]
+    }
+
+    val avatar: Flow<String?> = context.authDataStore.data.map { preferences ->
+        preferences[AVATAR_KEY]
+    }
+
     // Flow para verificar se está autenticado
     val isLoggedIn: Flow<Boolean> = context.authDataStore.data.map { preferences ->
         preferences[TOKEN_KEY] != null
     }
 
     // Guardar token após login
-    suspend fun saveToken(token: String, username: String, name: String? = null, refreshToken: String? = null) {
+    suspend fun saveToken(token: String, username: String, name: String? = null, refreshToken: String? = null, email: String? = null) {
         context.authDataStore.edit { preferences ->
             preferences[TOKEN_KEY] = token
             preferences[USERNAME_KEY] = username
             name?.let { preferences[NAME_KEY] = it }
             refreshToken?.let { preferences[REFRESH_TOKEN_KEY] = it }
+            email?.let { preferences[EMAIL_KEY] = it }
+        }
+    }
+
+    // Atualizar nome e email após edição do perfil
+    suspend fun updateProfile(name: String, email: String) {
+        context.authDataStore.edit { preferences ->
+            preferences[NAME_KEY] = name
+            preferences[EMAIL_KEY] = email
+        }
+    }
+
+    suspend fun updateUsername(username: String) {
+        context.authDataStore.edit { preferences ->
+            preferences[USERNAME_KEY] = username
+        }
+    }
+
+    suspend fun updateAvatar(avatarBase64: String?) {
+        context.authDataStore.edit { preferences ->
+            if (avatarBase64 != null) preferences[AVATAR_KEY] = avatarBase64
+            else preferences.remove(AVATAR_KEY)
         }
     }
 
@@ -80,6 +112,8 @@ class AuthManager private constructor(private val context: Context) {
             preferences.remove(REFRESH_TOKEN_KEY)
             preferences.remove(USERNAME_KEY)
             preferences.remove(NAME_KEY)
+            preferences.remove(EMAIL_KEY)
+            preferences.remove(AVATAR_KEY)
         }
     }
 

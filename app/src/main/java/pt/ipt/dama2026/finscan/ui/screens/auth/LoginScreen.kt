@@ -188,19 +188,19 @@ fun LoginScreen(
                                     AuthManager.getInstance(context).saveToken(
                                         token = tokenResponse.accessToken,
                                         username = username,
-                                        name = tokenResponse.name
+                                        name = tokenResponse.name,
+                                        refreshToken = tokenResponse.refreshToken,
+                                        email = tokenResponse.email
                                     )
 
                                     onLoginSuccess()
                                 } else {
                                     val errorBody = response.errorBody()?.string() ?: ""
-                                    val parsedMessage = try {
-                                        val jsonObject = JSONObject(errorBody)
-                                        jsonObject.optString("detail", context.getString(R.string.auth_unknown_error))
-                                    } catch (e: Exception) {
-                                        errorBody.ifEmpty { context.getString(R.string.auth_unknown_error) }
+                                    val detail = try { JSONObject(errorBody).optString("detail") } catch (_: Exception) { "" }
+                                    errorMessage = when (detail) {
+                                        "email_not_verified" -> context.getString(R.string.auth_error_email_not_verified)
+                                        else -> detail.ifEmpty { context.getString(R.string.auth_unknown_error) }
                                     }
-                                    errorMessage = parsedMessage
                                 }
                             } catch (e: Exception) {
                                 val msg = e.message ?: ""

@@ -3,6 +3,7 @@ package pt.ipt.dama2026.finscan.data.api.services
 import pt.ipt.dama2026.finscan.data.api.models.*
 import retrofit2.Response
 import retrofit2.http.*
+import retrofit2.http.PATCH
 
 interface AuthApiService {
     @FormUrlEncoded
@@ -26,4 +27,10 @@ interface AuthApiService {
 
     @POST("auth/refresh")
     suspend fun refreshToken(@Body request: RefreshTokenRequest): Response<TokenResponse>
+
+    @PATCH("users/me")
+    suspend fun updateProfile(@Body request: UpdateProfileRequest): Response<UserResponse>
+
+    @GET("users/me")
+    suspend fun getMe(): Response<UserResponse>
 }

@@ -17,7 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import pt.ipt.dama2026.finscan.data.api.ApiClient
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +49,7 @@ fun SettingsScreen() {
     // Get user data from AuthManager
     val name by authManager.name.collectAsState(initial = "")
     val username by authManager.username.collectAsState(initial = "")
+    val avatar by authManager.avatar.collectAsState(initial = null)
 
     // Processar o nome para mostrar apenas a primeira e a última palavra
     val displayName = remember(name) {
@@ -65,12 +69,14 @@ fun SettingsScreen() {
         "settings" -> SettingsMainContent(
             name = displayName,
             username = username ?: "",
+            avatarBase64 = avatar,
             currentDarkMode = currentDarkMode,
             settingsManager = settingsManager,
             scope = scope,
             onNavigateToLanguage = { currentScreen = "language" },
             onNavigateToAboutUs = { currentScreen = "about_us" },
             onNavigateToChangePassword = { currentScreen = "change_password" },
+            onNavigateToEditProfile = { currentScreen = "edit_profile" },
             onLogout = {
                 scope.launch {
                     authManager.clearAuth()
@@ -86,6 +92,9 @@ fun SettingsScreen() {
         "change_password" -> ChangePasswordScreen(
             onBack = { currentScreen = "settings" }
         )
+        "edit_profile" -> EditProfileScreen(
+            onBack = { currentScreen = "settings" }
+        )
     }
 }
 
@@ -93,12 +102,14 @@ fun SettingsScreen() {
 fun SettingsMainContent(
     name: String,
     username: String,
+    avatarBase64: String? = null,
     currentDarkMode: Boolean,
     settingsManager: SettingsManager,
     scope: kotlinx.coroutines.CoroutineScope,
     onNavigateToLanguage: () -> Unit = {},
     onNavigateToAboutUs: () -> Unit = {},
     onNavigateToChangePassword: () -> Unit = {},
+    onNavigateToEditProfile: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -171,12 +182,17 @@ fun SettingsMainContent(
                     .background(SettingsProfilePlaceholderColor),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = SettingsIconTintColor
-                )
+                val avatarUrl = remember(avatarBase64) { ApiClient.avatarUrl(avatarBase64) }
+                if (avatarUrl != null) {
+                    AsyncImage(
+                        model = avatarUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(32.dp), tint = SettingsIconTintColor)
+                }
             }
             Spacer(modifier = Modifier.width(16.dp))
              Column(modifier = Modifier.weight(1f)) {
@@ -212,7 +228,8 @@ fun SettingsMainContent(
         SettingsClickableItem(
             icon = Icons.Default.Person,
             iconContainerColor = SettingsEditProfileColor,
-            label = stringResource(R.string.settings_edit_profile)
+            label = stringResource(R.string.settings_edit_profile),
+            onClick = onNavigateToEditProfile
         )
         SettingsClickableItem(
             icon = Icons.Default.Lock,

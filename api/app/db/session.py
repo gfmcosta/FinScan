@@ -25,6 +25,20 @@ def init_db() -> None:
             db.execute(text("ALTER TABLE category ADD COLUMN icon VARCHAR DEFAULT 'Category'"))
             db.commit()
 
+        # User table new columns
+        user_columns = [c["name"] for c in inspector.get_columns("user")]
+        user_migrations = [
+            ("avatar", "ALTER TABLE \"user\" ADD COLUMN avatar TEXT"),
+            ("is_verified", "ALTER TABLE \"user\" ADD COLUMN is_verified BOOLEAN"),
+            ("verification_token", "ALTER TABLE \"user\" ADD COLUMN verification_token VARCHAR"),
+            ("pending_email", "ALTER TABLE \"user\" ADD COLUMN pending_email VARCHAR"),
+            ("email_change_token", "ALTER TABLE \"user\" ADD COLUMN email_change_token VARCHAR"),
+        ]
+        for col_name, sql in user_migrations:
+            if col_name not in user_columns:
+                db.execute(text(sql))
+        db.commit()
+
         existing_categories = db.query(models.Category).first()
         if existing_categories is None:
             default_categories = [
