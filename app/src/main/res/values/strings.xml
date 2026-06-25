@@ -135,6 +135,17 @@
     <string name="receipt_detail_no_location">No location data</string>
     <string name="receipt_detail_open_maps">Open in Maps</string>
 
+    <!-- Scan Strings -->
+    <string name="scan_permission_title">Camera Access Required</string>
+    <string name="scan_permission_rationale">FinScan needs camera access to scan and analyse your receipts automatically.</string>
+    <string name="scan_grant_permission">Allow Camera</string>
+    <string name="scan_instruction">Point your camera at the receipt and tap the button</string>
+    <string name="scan_processing">Analysing receipt…</string>
+    <string name="scan_processing_subtitle">This may take a few seconds</string>
+    <string name="scan_error_title">Scan Failed</string>
+    <string name="scan_error_generic">Could not process the receipt. Please try again.</string>
+    <string name="scan_retry">Try Again</string>
+
     <!-- Forgot Password Strings -->
     <string name="forgot_password_instruction_email">Enter your email address and we\'ll send you a 6-digit code to reset your password.</string>
     <string name="forgot_password_instruction_code">Enter the 6-digit code sent to your email and choose a new password.</string>

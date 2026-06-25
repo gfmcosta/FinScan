@@ -135,6 +135,17 @@
     <string name="receipt_detail_no_location">Sem dados de localização</string>
     <string name="receipt_detail_open_maps">Abrir no Maps</string>
 
+    <!-- Ler Recibo (Scan) -->
+    <string name="scan_permission_title">Acesso à Câmara Necessário</string>
+    <string name="scan_permission_rationale">O FinScan precisa de acesso à câmara para digitalizar e analisar os seus recibos automaticamente.</string>
+    <string name="scan_grant_permission">Permitir Câmara</string>
+    <string name="scan_instruction">Aponte a câmara para o recibo e toque no botão</string>
+    <string name="scan_processing">A analisar o recibo…</string>
+    <string name="scan_processing_subtitle">Isto pode demorar alguns segundos</string>
+    <string name="scan_error_title">Falha na Leitura</string>
+    <string name="scan_error_generic">Não foi possível processar o recibo. Por favor, tente novamente.</string>
+    <string name="scan_retry">Tentar Novamente</string>
+
     <!-- Forgot Password Strings -->
     <string name="forgot_password_instruction_email">Introduza o seu e-mail e enviaremos um código de 6 dígitos para redefinir a sua password.</string>
     <string name="forgot_password_instruction_code">Introduza o código de 6 dígitos enviado para o seu e-mail e escolha uma nova password.</string>
