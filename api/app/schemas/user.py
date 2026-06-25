@@ -18,8 +18,16 @@ class UserRead(UserBase):
     id: int
     role: UserRole
     is_active: bool
+    avatar: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserUpdate(BaseModel):
+    username: str | None = None
+    name: str | None = None
+    email: str | None = None
+    avatar_base64: str | None = None
 
 
 class ChangePasswordRequest(BaseModel):

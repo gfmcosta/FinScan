@@ -53,7 +53,9 @@ data class TokenResponse(
     @SerializedName("token_type")
     val tokenType: String = "bearer",
     @SerializedName("name")
-    val name: String? = null
+    val name: String? = null,
+    @SerializedName("email")
+    val email: String? = null
 )
 
 data class RefreshTokenRequest(
@@ -66,12 +68,16 @@ data class UserResponse(
     val id: Int,
     @SerializedName("username")
     val username: String,
+    @SerializedName("name")
+    val name: String? = null,
     @SerializedName("email")
     val email: String,
     @SerializedName("role")
     val role: String,
     @SerializedName("is_active")
-    val isActive: Boolean
+    val isActive: Boolean,
+    @SerializedName("avatar")
+    val avatar: String? = null
 )
 
 data class AuthResponse(
@@ -81,6 +87,17 @@ data class AuthResponse(
     val accessToken: String,
     @SerializedName("token_type")
     val tokenType: String = "bearer"
+)
+
+data class UpdateProfileRequest(
+    @SerializedName("username")
+    val username: String? = null,
+    @SerializedName("name")
+    val name: String? = null,
+    @SerializedName("email")
+    val email: String? = null,
+    @SerializedName("avatar_base64")
+    val avatarBase64: String? = null,
 )
 
 // API Error Response

@@ -6,6 +6,7 @@ class Token(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     name: str | None = None
+    email: str | None = None
 
 
 class RefreshRequest(BaseModel):
