@@ -162,8 +162,8 @@
     <string name="forgot_password_error_invalid_code">Please enter a valid 6-digit code</string>
 
     <!-- Pagination -->
-    <string name="pagination_prev">Anterior</string>
-    <string name="pagination_next">Próxima</string>
-    <string name="pagination_page">Página %d</string>
+    <string name="pagination_prev">Previous</string>
+    <string name="pagination_next">Next</string>
+    <string name="pagination_page">Page %d</string>
 
 </resources>

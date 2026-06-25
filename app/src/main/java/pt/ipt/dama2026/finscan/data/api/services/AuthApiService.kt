@@ -23,4 +23,7 @@ interface AuthApiService {
 
     @POST("auth/reset-password")
     suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<Unit>
+
+    @POST("auth/refresh")
+    suspend fun refreshToken(@Body request: RefreshTokenRequest): Response<TokenResponse>
 }

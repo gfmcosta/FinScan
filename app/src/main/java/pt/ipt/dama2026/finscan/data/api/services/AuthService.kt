@@ -30,7 +30,7 @@ class AuthService(private val context: Context) {
                 response.isSuccessful && response.body() != null -> {
                     val tokenResponse = response.body()!!
                     // Guardar token e nome
-                    authManager.saveToken(tokenResponse.accessToken, username, tokenResponse.name)
+                    authManager.saveToken(tokenResponse.accessToken, username, tokenResponse.name, tokenResponse.refreshToken)
                     Result.Success(tokenResponse.accessToken)
                 }
                 response.code() == 401 -> {
