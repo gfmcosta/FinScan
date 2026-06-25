@@ -136,6 +136,10 @@
     <string name="receipt_detail_open_maps">Abrir no Maps</string>
 
     <!-- Ler Recibo (Scan) -->
+    <string name="scan_location_permission_title">Acesso à Localização</string>
+    <string name="scan_location_permission_rationale">O FinScan usa a sua localização para registar onde cada recibo foi digitalizado.</string>
+    <string name="scan_grant_location">Permitir Localização</string>
+    <string name="scan_skip_location">Ignorar</string>
     <string name="scan_permission_title">Acesso à Câmara Necessário</string>
     <string name="scan_permission_rationale">O FinScan precisa de acesso à câmara para digitalizar e analisar os seus recibos automaticamente.</string>
     <string name="scan_grant_permission">Permitir Câmara</string>
