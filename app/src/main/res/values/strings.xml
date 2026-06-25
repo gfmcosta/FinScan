@@ -144,6 +144,7 @@
     <string name="scan_processing_subtitle">This may take a few seconds</string>
     <string name="scan_error_title">Scan Failed</string>
     <string name="scan_error_generic">Could not process the receipt. Please try again.</string>
+    <string name="scan_error_not_receipt">This image does not appear to be a receipt. Please take a photo of a valid receipt.</string>
     <string name="scan_retry">Try Again</string>
 
     <!-- Forgot Password Strings -->

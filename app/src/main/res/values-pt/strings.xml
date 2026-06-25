@@ -144,6 +144,7 @@
     <string name="scan_processing_subtitle">Isto pode demorar alguns segundos</string>
     <string name="scan_error_title">Falha na Leitura</string>
     <string name="scan_error_generic">Não foi possível processar o recibo. Por favor, tente novamente.</string>
+    <string name="scan_error_not_receipt">A imagem não parece ser um recibo. Por favor, tire uma foto de um recibo válido.</string>
     <string name="scan_retry">Tentar Novamente</string>
 
     <!-- Forgot Password Strings -->

@@ -14,7 +14,12 @@ from app.schemas.receipt import ReceiptOCRParsed
 
 
 BASE_PROMPT = """
-Extrai dados do recibo e devolve APENAS JSON válido com este formato:
+Analisa a imagem e determina se é um recibo/fatura/talão de compra.
+
+Se NÃO for um recibo, devolve APENAS:
+{"error": "not_a_receipt"}
+
+Se FOR um recibo, extrai os dados e devolve APENAS JSON válido com este formato:
 {
   "store": "nome loja",
   "category": "nome da categoria",
@@ -119,9 +124,16 @@ def parse_receipt_with_gemini(
 
     try:
         payload = _extract_json_block(response.text or "")
+        if payload.get("error") == "not_a_receipt":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="not_a_receipt",
+            )
         if "purchase_date" not in payload:
             payload["purchase_date"] = datetime.now(UTC).isoformat()
         return ReceiptOCRParsed(**payload)
+    except HTTPException:
+        raise
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,

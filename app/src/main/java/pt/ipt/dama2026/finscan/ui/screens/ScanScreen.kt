@@ -100,7 +100,13 @@ fun ScanScreen() {
                                     scannedReceipt = response.body()
                                     scanState = ScanState.SUCCESS
                                 } else {
-                                    errorMessage = context.getString(R.string.scan_error_generic)
+                                    val isNotReceipt = response.code() == 422 &&
+                                        response.errorBody()?.string()?.contains("not_a_receipt") == true
+                                    errorMessage = if (isNotReceipt) {
+                                        context.getString(R.string.scan_error_not_receipt)
+                                    } else {
+                                        context.getString(R.string.scan_error_generic)
+                                    }
                                     scanState = ScanState.ERROR
                                 }
                             } catch (e: Exception) {
