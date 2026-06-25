@@ -2,6 +2,8 @@ package pt.ipt.dama2026.finscan.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +14,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
@@ -29,7 +33,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import android.util.Base64
 import kotlinx.coroutines.launch
 import pt.ipt.dama2026.finscan.R
 import pt.ipt.dama2026.finscan.data.api.ApiClient
@@ -44,6 +47,7 @@ import java.util.concurrent.Executors
 
 private enum class ScanState { PERMISSION, CAMERA, PROCESSING, ERROR, SUCCESS }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanScreen() {
     val context = LocalContext.current
@@ -58,12 +62,66 @@ fun ScanScreen() {
     }
     var scannedReceipt by remember { mutableStateOf<ReceiptResponse?>(null) }
     var errorMessage by remember { mutableStateOf("") }
+    var showPickerSheet by remember { mutableStateOf(false) }
+
+    // Shared: read a URI and send to API
+    suspend fun sendUri(uri: Uri) {
+        try {
+            val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
+            val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            if (bytes == null || bytes.isEmpty()) {
+                errorMessage = context.getString(R.string.scan_error_generic)
+                scanState = ScanState.ERROR
+                return
+            }
+            val api = ApiClient.getRetrofit().create(ScanApiService::class.java)
+            val imageBase64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+            val response = api.scanReceipt(ReceiptOCRRequest(imageBase64 = imageBase64, mimeType = mimeType))
+            if (response.isSuccessful && response.body() != null) {
+                scannedReceipt = response.body()
+                scanState = ScanState.SUCCESS
+            } else {
+                val isNotReceipt = response.code() == 422 &&
+                    response.errorBody()?.string()?.contains("not_a_receipt") == true
+                errorMessage = if (isNotReceipt) {
+                    context.getString(R.string.scan_error_not_receipt)
+                } else {
+                    context.getString(R.string.scan_error_generic)
+                }
+                scanState = ScanState.ERROR
+            }
+        } catch (e: Exception) {
+            Log.e("ScanScreen", "File scan failed", e)
+            errorMessage = context.getString(R.string.auth_error_internet)
+            scanState = ScanState.ERROR
+        }
+    }
+
+    // Gallery launcher — images only
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scanState = ScanState.PROCESSING
+        scope.launch { sendUri(uri) }
+    }
+
+    // File launcher — images + PDFs
+    val fileLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scanState = ScanState.PROCESSING
+        scope.launch { sendUri(uri) }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         scanState = if (granted) ScanState.CAMERA else ScanState.PERMISSION
     }
+
+    val onPickPressed: () -> Unit = { showPickerSheet = true }
 
     // After a successful scan, show the detail screen for validation
     if (scanState == ScanState.SUCCESS && scannedReceipt != null) {
@@ -79,13 +137,12 @@ fun ScanScreen() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (scanState) {
-
             ScanState.PERMISSION -> {
-                PermissionScreen(onRequestPermission = {
-                    permissionLauncher.launch(Manifest.permission.CAMERA)
-                })
+                PermissionScreen(
+                    onRequestPermission = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+                    onPickFile = onPickPressed
+                )
             }
-
             ScanState.CAMERA, ScanState.PROCESSING -> {
                 CameraContent(
                     isProcessing = scanState == ScanState.PROCESSING,
@@ -117,26 +174,87 @@ fun ScanScreen() {
                                 file.delete()
                             }
                         }
-                    }
+                    },
+                    onPickFile = onPickPressed
                 )
             }
-
             ScanState.ERROR -> {
                 ErrorScreen(
                     message = errorMessage,
                     onRetry = { scanState = ScanState.CAMERA }
                 )
             }
-
-            ScanState.SUCCESS -> { /* handled above the when block */ }
+            ScanState.SUCCESS -> { /* handled above */ }
         }
+    }
+
+    // Bottom sheet — choose between gallery or files
+    if (showPickerSheet) {
+        ModalBottomSheet(onDismissRequest = { showPickerSheet = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.scan_pick_source_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+                HorizontalDivider()
+                PickerOption(
+                    icon = Icons.Default.PhotoLibrary,
+                    label = stringResource(R.string.scan_pick_gallery),
+                    onClick = {
+                        showPickerSheet = false
+                        galleryLauncher.launch("image/*")
+                    }
+                )
+                PickerOption(
+                    icon = Icons.Default.FolderOpen,
+                    label = stringResource(R.string.scan_pick_files),
+                    onClick = {
+                        showPickerSheet = false
+                        fileLauncher.launch(arrayOf("image/*", "application/pdf"))
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PickerOption(icon: ImageVector, label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = IndigoTechnological,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 
 // ─── Permission screen ────────────────────────────────────────────────────────
 
 @Composable
-private fun PermissionScreen(onRequestPermission: () -> Unit) {
+private fun PermissionScreen(
+    onRequestPermission: () -> Unit,
+    onPickFile: () -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -171,9 +289,23 @@ private fun PermissionScreen(onRequestPermission: () -> Unit) {
             Button(
                 onClick = onRequestPermission,
                 colors = ButtonDefaults.buttonColors(containerColor = IndigoTechnological),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.scan_grant_permission))
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = onPickFile,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = IndigoTechnological)
+            ) {
+                Icon(Icons.Default.FolderOpen, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.scan_pick_file))
             }
         }
     }
@@ -219,11 +351,7 @@ private fun ErrorScreen(message: String, onRetry: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = IndigoTechnological),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(
-                    Icons.Default.Refresh,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
+                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.scan_retry))
             }
@@ -236,7 +364,8 @@ private fun ErrorScreen(message: String, onRetry: () -> Unit) {
 @Composable
 private fun CameraContent(
     isProcessing: Boolean,
-    onPhotoTaken: (File) -> Unit
+    onPhotoTaken: (File) -> Unit,
+    onPickFile: () -> Unit,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -275,11 +404,7 @@ private fun CameraContent(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Camera preview
-        AndroidView(
-            factory = { previewView },
-            modifier = Modifier.fillMaxSize()
-        )
+        AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
 
         // Top instruction banner
         Box(
@@ -299,16 +424,33 @@ private fun CameraContent(
             )
         }
 
-        // Bottom capture bar
+        // Bottom bar — gallery button left, capture button centre
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
                 .background(Color.Black.copy(alpha = 0.45f))
                 .navigationBarsPadding()
-                .padding(vertical = 32.dp),
-            contentAlignment = Alignment.Center
+                .padding(vertical = 32.dp, horizontal = 32.dp)
         ) {
+            // Gallery/file picker button — left
+            IconButton(
+                onClick = onPickFile,
+                enabled = !isProcessing,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .size(52.dp)
+                    .background(Color.White.copy(alpha = 0.2f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PhotoLibrary,
+                    contentDescription = stringResource(R.string.scan_pick_file),
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            // Capture button — centre
             CaptureButton(
                 enabled = !isProcessing,
                 onClick = {
@@ -329,7 +471,8 @@ private fun CameraContent(
                             }
                         }
                     )
-                }
+                },
+                modifier = Modifier.align(Alignment.Center)
             )
         }
 
@@ -371,11 +514,11 @@ private fun CameraContent(
 // ─── Capture button ───────────────────────────────────────────────────────────
 
 @Composable
-private fun CaptureButton(enabled: Boolean, onClick: () -> Unit) {
+private fun CaptureButton(enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     IconButton(
         onClick = onClick,
         enabled = enabled,
-        modifier = Modifier.size(80.dp)
+        modifier = modifier.size(80.dp)
     ) {
         Box(
             modifier = Modifier
@@ -386,10 +529,7 @@ private fun CaptureButton(enabled: Boolean, onClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(62.dp)
-                    .background(
-                        if (enabled) IndigoTechnological else Color.Gray,
-                        CircleShape
-                    )
+                    .background(if (enabled) IndigoTechnological else Color.Gray, CircleShape)
             )
         }
     }

@@ -145,6 +145,10 @@
     <string name="scan_error_title">Falha na Leitura</string>
     <string name="scan_error_generic">Não foi possível processar o recibo. Por favor, tente novamente.</string>
     <string name="scan_error_not_receipt">A imagem não parece ser um recibo. Por favor, tire uma foto de um recibo válido.</string>
+    <string name="scan_pick_source_title">Escolher origem</string>
+    <string name="scan_pick_gallery">Galeria</string>
+    <string name="scan_pick_files">Ficheiros (Imagem / PDF)</string>
+    <string name="scan_pick_file">Escolher da Galeria / PDF</string>
     <string name="scan_retry">Tentar Novamente</string>
 
     <!-- Forgot Password Strings -->
