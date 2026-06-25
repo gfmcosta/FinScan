@@ -7,6 +7,7 @@
     <string name="settings_label">Definições</string>
     <string name="home_monthly_spent_title">Este mês já gastou</string>
     <string name="home_category_spent_title">Top 5 categorias com mais gastos</string>
+    <string name="home_no_data">Sem dados para apresentar</string>
     <string name="home_hi_title">Olá, </string>
     <string name="splash_tag_line">Leia os seus recibos facilmente</string>
     <string name="splash_loading_text">A carregar…</string>
@@ -53,7 +54,8 @@
     <string name="auth_login_subtitle">Inicie sessão na sua conta</string>
     <string name="auth_register_title">Criar Conta</string>
     <string name="auth_register_subtitle">Junte-se ao FinScan hoje</string>
-    <string name="auth_register_success">Utilizador registado com sucesso! Redirecionando para o Login…</string>
+    <string name="auth_register_success">Registo com sucesso! Verifique o seu e-mail para ativar a conta.</string>
+    <string name="auth_error_email_not_verified">Por favor, verifique o seu e-mail antes de iniciar sessão. Consulte a caixa de entrada.</string>
     <string name="auth_username_hint">Nome de utilizador</string>
     <string name="auth_name_hint">Nome Completo</string>
     <string name="auth_email_hint">E-mail</string>
@@ -169,5 +171,28 @@
     <string name="pagination_prev">Anterior</string>
     <string name="pagination_next">Próxima</string>
     <string name="pagination_page">Página %d</string>
+
+
+    <!-- Strings de seleção de origem -->
+    <string name="pick_source_title">Escolher origem</string>
+    <string name="pick_gallery">Galeria</string>
+    <string name="pick_files">Ficheiros</string>
+
+    <!-- Edit Profile -->
+    <string name="edit_profile_title">Editar Perfil</string>
+    <string name="edit_profile_name_label">Nome Completo</string>
+    <string name="edit_profile_email_label">E-mail</string>
+    <string name="edit_profile_username_label">Nome de utilizador</string>
+    <string name="edit_profile_username_hint">Não pode ser alterado</string>
+    <string name="edit_profile_save">Guardar Alterações</string>
+    <string name="edit_profile_success">Perfil atualizado com sucesso</string>
+    <string name="edit_profile_error">Erro ao atualizar perfil</string>
+    <string name="edit_profile_name_empty">O nome não pode estar vazio</string>
+    <string name="edit_profile_email_invalid">Introduza um e-mail válido</string>
+    <string name="edit_profile_username_empty">O nome de utilizador não pode estar vazio</string>
+    <string name="edit_profile_username_taken">Este nome de utilizador já está em uso</string>
+    <string name="edit_profile_email_taken">Este e-mail já está em uso</string>
+    <string name="edit_profile_email_pending">Confirmação enviada para %s. Clique no link no e-mail para aplicar a alteração.</string>
+    <string name="edit_profile_remove_photo">Remover foto</string>
 
 </resources>

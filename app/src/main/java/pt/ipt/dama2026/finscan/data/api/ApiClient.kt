@@ -19,6 +19,12 @@ object ApiClient {
     //    private const val BASE_URL = "https://finscan-production.up.railway.app/api/v1/"
     private const val BASE_URL = "http://10.0.2.2:8000/api/v1/"
 
+    // Root URL used for static assets (e.g. avatar images at /uploads/<filename>)
+    val ROOT_URL = BASE_URL.removeSuffix("api/v1/")  // "http://10.0.2.2:8000/"
+
+    fun avatarUrl(filename: String?): String? =
+        if (filename.isNullOrBlank()) null else "${ROOT_URL}uploads/$filename"
+
     private var authManager: AuthManager? = null
     private var retrofit: Retrofit? = null
 

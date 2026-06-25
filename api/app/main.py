@@ -1,4 +1,7 @@
+import os
+
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.categories import router as categories_router
@@ -8,12 +11,15 @@ from app.api.v1.endpoints.users import router as users_router
 from app.core.config import settings
 from app.db.session import init_db
 
+UPLOADS_DIR = os.path.join(os.path.dirname(__file__), "..", "uploads")
 
 app = FastAPI(title=settings.app_name)
 
 
 @app.on_event("startup")
 def on_startup() -> None:
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
     init_db()
 
 

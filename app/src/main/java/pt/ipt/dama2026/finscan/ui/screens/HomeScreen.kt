@@ -289,45 +289,67 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                val chartColors = listOf(
-                    EmeraldGreen,
-                    IndigoTechnological,
-                    AmberAlert,
-                    Color(0xFFEC4899),
-                    LightBlue
-                )
-
-                val maxTotal = remember(topCategories) {
-                    topCategories.maxOfOrNull { it.total } ?: 1.0
-                }
-                val chartData = remember(topCategories, maxTotal) {
-                    topCategories.mapIndexed { index, cat ->
-                        (cat.total / maxTotal).toFloat() to chartColors[index % chartColors.size]
+            if (topCategories.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.BarChart,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = getAdaptiveSubtext()
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = stringResource(R.string.home_no_data),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = getAdaptiveSubtext()
+                        )
                     }
                 }
-
-                BarChartPlaceholder(
-                    data = chartData,
+            } else {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .fillMaxSize()
+                        .padding(16.dp)
                 ) {
-                    topCategories.forEachIndexed { index, cat ->
-                        val amount = String.format("%.2f", cat.total).replace(".", ",")
-                        CategoryLegendItem(cat.key, amount, chartColors[index % chartColors.size])
+                    val chartColors = listOf(
+                        EmeraldGreen,
+                        IndigoTechnological,
+                        AmberAlert,
+                        Color(0xFFEC4899),
+                        LightBlue
+                    )
+
+                    val maxTotal = remember(topCategories) {
+                        topCategories.maxOfOrNull { it.total } ?: 1.0
+                    }
+                    val chartData = remember(topCategories, maxTotal) {
+                        topCategories.mapIndexed { index, cat ->
+                            (cat.total / maxTotal).toFloat() to chartColors[index % chartColors.size]
+                        }
+                    }
+
+                    BarChartPlaceholder(
+                        data = chartData,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        topCategories.forEachIndexed { index, cat ->
+                            val amount = String.format("%.2f", cat.total).replace(".", ",")
+                            CategoryLegendItem(cat.key, amount, chartColors[index % chartColors.size])
+                        }
                     }
                 }
             }
