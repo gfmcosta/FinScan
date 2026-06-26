@@ -8,6 +8,7 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Route
 import okhttp3.logging.HttpLoggingInterceptor
+import pt.ipt.dama2026.finscan.BuildConfig
 import pt.ipt.dama2026.finscan.data.api.models.RefreshTokenRequest
 import pt.ipt.dama2026.finscan.data.api.services.AuthApiService
 import pt.ipt.dama2026.finscan.data.datastore.AuthManager
@@ -16,11 +17,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-        private const val BASE_URL = "https://finscan-production.up.railway.app/api/v1/"
-//    private const val BASE_URL = "http://10.0.2.2:8000/api/v1/"
+    // Injected at build time from local.properties (see app/build.gradle.kts)
+    private val BASE_URL: String = BuildConfig.BASE_URL
 
     // Root URL used for static assets (e.g. avatar images at /uploads/<filename>)
-    val ROOT_URL = BASE_URL.removeSuffix("api/v1/")  // "http://10.0.2.2:8000/"
+    val ROOT_URL: String get() = BASE_URL.removeSuffix("api/v1/")  // e.g. "http://10.0.2.2:8000/"
 
     fun avatarUrl(filename: String?): String? =
         if (filename.isNullOrBlank()) null else "${ROOT_URL}uploads/$filename"

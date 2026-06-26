@@ -1,7 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
+
+// Read BASE_URL from local.properties (gitignored — safe for secrets)
+val localProps = Properties().also { props ->
+    val file = rootProject.file("local.properties")
+    if (file.exists()) props.load(file.inputStream())
+}
+val baseUrl: String = localProps.getProperty("BASE_URL", "http://10.0.2.2:8000/api/v1/")
 
 android {
     namespace = "pt.ipt.dama2026.finscan"
@@ -19,6 +28,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Inject BASE_URL so ApiClient can read it without hardcoding
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     buildTypes {
@@ -36,6 +48,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true   // needed to expose BuildConfig.BASE_URL
     }
 }
 
