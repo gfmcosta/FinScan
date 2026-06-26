@@ -12,8 +12,17 @@ class Settings(BaseSettings):
 
     database_url: str = ""
 
-    # Public URL used in email links (e.g. https://finscan-production.up.railway.app)
+    @property
+    def database_url_fixed(self) -> str:
+        """SQLAlchemy requires 'postgresql://' but Railway provides 'postgres://'."""
+        url = self.database_url
+        if url.startswith("postgres://"):
+            url = "postgresql://" + url[len("postgres://"):]
+        return url
+
+    # Public URL used in email links
     base_url: str = "http://localhost:8000"
+#     base_url: str = "https://finscan-production.up.railway.app"
 
     gemini_api_key: str = ""
     gemini_model: str = ""
