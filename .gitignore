@@ -77,3 +77,4 @@ servers.json
 # User-generated content (PDFs and uploaded receipts)
 api/reports/
 api/uploads/
+/finscan.jks

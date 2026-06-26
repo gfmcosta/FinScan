@@ -21,7 +21,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "pt.ipt.dama2026.finscan"
+        applicationId = "pt.ipt.dama.FinScan"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
@@ -33,9 +33,19 @@ android {
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile     = rootProject.file(localProps.getProperty("KEYSTORE_PATH", "finscan.jks"))
+            storePassword = localProps.getProperty("KEYSTORE_PASSWORD", "")
+            keyAlias      = localProps.getProperty("KEY_ALIAS", "finscan")
+            keyPassword   = localProps.getProperty("KEY_PASSWORD", "")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig   = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
