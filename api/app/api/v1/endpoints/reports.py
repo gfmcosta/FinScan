@@ -20,8 +20,11 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 def _generate_in_background(report_id: int, locale: str) -> None:
     """Background task: generate PDF and update report status."""
     from app.db.session import SessionLocal
+    from app.services.notification_manager import manager as ws_manager
 
     db = SessionLocal()
+    ws_payload: dict | None = None
+    ws_user_id: int | None = None
     try:
         report = db.query(Report).filter(Report.id == report_id).first()
         if not report:
@@ -48,6 +51,23 @@ def _generate_in_background(report_id: int, locale: str) -> None:
         db.add(report)
         db.commit()
 
+        # Build WS payload now (while we still have the report object),
+        # but send it AFTER db.close() so the new status is visible to any
+        # DB query the Android client fires immediately on receipt.
+        period = "All time"
+        if report.date_from or report.date_to:
+            f = report.date_from.strftime("%d/%m/%Y") if report.date_from else "—"
+            t = report.date_to.strftime("%d/%m/%Y")   if report.date_to   else "—"
+            period = f"{f} → {t}"
+
+        ws_user_id = report.user_id
+        ws_payload = {
+            "type": "notification",
+            "title": "Report ready!",
+            "body": f"Your report ({period}) is ready to download.",
+            "data": {"report_id": report_id, "action": "open_reports"},
+        }
+
     except Exception as exc:
         db.rollback()
         try:
@@ -61,6 +81,11 @@ def _generate_in_background(report_id: int, locale: str) -> None:
         raise exc
     finally:
         db.close()
+
+    # Send the WebSocket notification only after the DB session is fully closed,
+    # guaranteeing the "completed" status is visible to the next API poll.
+    if ws_payload is not None and ws_user_id is not None:
+        ws_manager.send_to_user_threadsafe(ws_user_id, ws_payload)
 
 
 @router.post("/generate", response_model=ReportRead, status_code=status.HTTP_202_ACCEPTED)

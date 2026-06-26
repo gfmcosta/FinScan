@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
 import pt.ipt.dama2026.finscan.data.datastore.AuthManager
 import pt.ipt.dama2026.finscan.utils.NotificationHelper
+import pt.ipt.dama2026.finscan.utils.WebSocketManager
 import pt.ipt.dama2026.finscan.ui.screens.SplashScreen
 import pt.ipt.dama2026.finscan.ui.screens.MainScreen
 import pt.ipt.dama2026.finscan.ui.screens.auth.AuthNavigationFlow
@@ -100,9 +101,19 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainApp(authManager: AuthManager) {
+    val context = LocalContext.current
     // Usamos null como estado inicial para saber quando o DataStore terminou de ler
     val isLoggedIn by authManager.isLoggedIn.collectAsState(initial = null)
     var splashFinished by remember { mutableStateOf(false) }
+
+    // Connect / disconnect WebSocket whenever login state changes
+    LaunchedEffect(isLoggedIn) {
+        when (isLoggedIn) {
+            true  -> WebSocketManager.connect(context)
+            false -> WebSocketManager.disconnect()
+            else  -> Unit
+        }
+    }
 
     when {
         // 1. Enquanto carrega o estado de autenticação, podemos mostrar um fundo vazio ou a splash
