@@ -12,6 +12,14 @@ class Settings(BaseSettings):
 
     database_url: str = ""
 
+    @property
+    def database_url_fixed(self) -> str:
+        """SQLAlchemy requires 'postgresql://' but Railway provides 'postgres://'."""
+        url = self.database_url
+        if url.startswith("postgres://"):
+            url = "postgresql://" + url[len("postgres://"):]
+        return url
+
     # Public URL used in email links (e.g. https://finscan-production.up.railway.app)
     base_url: str = "http://localhost:8000"
 
