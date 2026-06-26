@@ -207,6 +207,12 @@
     <string name="report_error_future_date">Dates cannot be in the future</string>
     <string name="report_error_date_order">Start date must be before end date</string>
 
+    <!-- Notifications -->
+    <string name="notif_channel_description">Notifications for completed reports</string>
+    <string name="notif_report_ready_title">Report ready!</string>
+    <string name="notif_report_ready_body">Your report has been generated and is ready to download.</string>
+    <string name="notif_permission_denied">Allow notifications in system settings to receive alerts.</string>
+
     <!-- Edit Profile -->
     <string name="edit_profile_title">Edit Profile</string>
     <string name="edit_profile_name_label">Full Name</string>

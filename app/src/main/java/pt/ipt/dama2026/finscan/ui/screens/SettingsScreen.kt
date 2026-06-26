@@ -1,5 +1,9 @@
 package pt.ipt.dama2026.finscan.ui.screens
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -33,6 +37,7 @@ import pt.ipt.dama2026.finscan.data.datastore.AuthManager
 import pt.ipt.dama2026.finscan.ui.components.CustomToast
 import pt.ipt.dama2026.finscan.ui.components.ToastState
 import pt.ipt.dama2026.finscan.ui.components.ToastType
+import pt.ipt.dama2026.finscan.utils.NotificationHelper
 
 
 @Composable
@@ -115,6 +120,30 @@ fun SettingsMainContent(
     val context = LocalContext.current
     var showLogoutDialog by remember { mutableStateOf(false) }
     var toastState by remember { mutableStateOf(ToastState()) }
+
+    // ── Notifications ─────────────────────────────────────────────────────────
+    val notificationsEnabled by settingsManager.notificationsEnabled.collectAsState(initial = false)
+
+    // Reflect real OS permission state (user may revoke from system settings)
+    val hasNotifPermission by remember {
+        derivedStateOf { NotificationHelper.hasPermission(context) }
+    }
+    val effectiveNotifications = notificationsEnabled && hasNotifPermission
+
+    val notifPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        scope.launch {
+            settingsManager.setNotificationsEnabled(granted)
+        }
+        if (!granted) {
+            toastState = ToastState(
+                message = context.getString(R.string.notif_permission_denied),
+                type = ToastType.ERROR,
+                isVisible = true
+            )
+        }
+    }
 
     if (showLogoutDialog) {
         AlertDialog(
@@ -243,7 +272,21 @@ fun SettingsMainContent(
             icon = Icons.Default.Notifications,
             iconContainerColor = SettingsNotificationsColor,
             label = stringResource(R.string.settings_notifications_label),
-            initialValue = false
+            initialValue = effectiveNotifications,
+            onCheckedChange = { enabled ->
+                if (enabled) {
+                    // Turning ON
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        // Android 12 and below: no runtime permission needed
+                        scope.launch { settingsManager.setNotificationsEnabled(true) }
+                    }
+                } else {
+                    // Turning OFF: just disable in prefs
+                    scope.launch { settingsManager.setNotificationsEnabled(false) }
+                }
+            }
         )
 
         SettingsSectionHeader(stringResource(R.string.settings_general_label))

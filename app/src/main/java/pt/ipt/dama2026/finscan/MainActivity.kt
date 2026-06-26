@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
 import pt.ipt.dama2026.finscan.data.datastore.AuthManager
+import pt.ipt.dama2026.finscan.utils.NotificationHelper
 import pt.ipt.dama2026.finscan.ui.screens.SplashScreen
 import pt.ipt.dama2026.finscan.ui.screens.MainScreen
 import pt.ipt.dama2026.finscan.ui.screens.auth.AuthNavigationFlow
@@ -30,6 +31,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Create notification channel (safe to call multiple times)
+        NotificationHelper.createChannel(this)
 
         // Use singleton settingsManager instance
         val settingsManager = SettingsManager.getInstance(this)

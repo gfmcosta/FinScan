@@ -207,6 +207,12 @@
     <string name="report_error_future_date">As datas não podem ser no futuro</string>
     <string name="report_error_date_order">A data de início deve ser anterior à data de fim</string>
 
+    <!-- Notificações -->
+    <string name="notif_channel_description">Notificações de relatórios concluídos</string>
+    <string name="notif_report_ready_title">Relatório pronto!</string>
+    <string name="notif_report_ready_body">O teu relatório foi gerado e está pronto para download.</string>
+    <string name="notif_permission_denied">Permite notificações nas definições do sistema para receber alertas.</string>
+
     <!-- Edit Profile -->
     <string name="edit_profile_title">Editar Perfil</string>
     <string name="edit_profile_name_label">Nome Completo</string>
