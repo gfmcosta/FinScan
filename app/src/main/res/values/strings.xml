@@ -178,6 +178,35 @@
     <string name="pick_gallery">Gallery</string>
     <string name="pick_files">Files</string>
 
+    <!-- Reports -->
+    <string name="report_generate_title">Generate Report</string>
+    <string name="report_since_forever">All time (since forever)</string>
+    <string name="report_date_from">Start Date</string>
+    <string name="report_date_to">End Date</string>
+    <string name="report_generate_button">Generate Report</string>
+    <string name="report_generate_error">Failed to generate report. Please try again.</string>
+    <string name="report_history_title">My Reports</string>
+    <string name="report_empty">No reports yet. Generate your first one above!</string>
+    <string name="report_status_completed">Completed</string>
+    <string name="report_status_generating">Generating</string>
+    <string name="report_status_failed">Failed</string>
+    <string name="report_period_all_time">All Time</string>
+    <string name="report_generated_at">Generated: %s</string>
+    <string name="report_download">Download PDF</string>
+    <string name="report_generating_hint">Generating in background…</string>
+    <string name="report_storage_permission_title">Storage Access Required</string>
+    <string name="report_storage_permission_rationale">FinScan needs storage access to save PDF reports to your device so you can open them.</string>
+    <string name="report_storage_permission_grant">Allow Storage</string>
+    <string name="report_load_error">Failed to load reports</string>
+    <string name="report_delete_title">Delete Report</string>
+    <string name="report_delete_message">Are you sure you want to delete this report?</string>
+    <string name="report_delete_error">Failed to delete report</string>
+    <string name="report_filter_month">Month</string>
+    <string name="report_filter_year">Year</string>
+    <string name="report_filter_all">All</string>
+    <string name="report_error_future_date">Dates cannot be in the future</string>
+    <string name="report_error_date_order">Start date must be before end date</string>
+
     <!-- Edit Profile -->
     <string name="edit_profile_title">Edit Profile</string>
     <string name="edit_profile_name_label">Full Name</string>
