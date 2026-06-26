@@ -38,7 +38,7 @@ import pt.ipt.dama2026.finscan.data.api.models.ReportResponse
 import pt.ipt.dama2026.finscan.data.api.services.ReportApiService
 import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
 import pt.ipt.dama2026.finscan.ui.theme.*
-import pt.ipt.dama2026.finscan.utils.NotificationHelper
+import pt.ipt.dama2026.finscan.utils.WebSocketManager
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -310,8 +310,7 @@ fun ReportsScreen() {
     val context = LocalContext.current
     val scope   = rememberCoroutineScope()
     val api     = remember { ApiClient.getRetrofit().create(ReportApiService::class.java) }
-    val currentLocale        by SettingsManager.getInstance(context).language.collectAsState(initial = "en")
-    val notificationsEnabled by SettingsManager.getInstance(context).notificationsEnabled.collectAsState(initial = false)
+    val currentLocale by SettingsManager.getInstance(context).language.collectAsState(initial = "en")
 
     // ── Permission gate ───────────────────────────────────────────────────────
     var reportsState by remember {
@@ -407,29 +406,25 @@ fun ReportsScreen() {
         loadPage(1)
     }
 
-    // ── Polling while any report is "generating" ──────────────────────────────
+    // ── Polling while any report is "generating" (UI update only) ────────────
+    // Notifications are fired exclusively by WebSocketManager to avoid duplicates.
     val hasGenerating = reports.any { it.status == "generating" }
-    // Strings extracted here so they're captured with the correct LocalContext locale
-    val notifTitle = stringResource(R.string.notif_report_ready_title)
-    val notifBody  = stringResource(R.string.notif_report_ready_body)
     LaunchedEffect(hasGenerating) {
         if (hasGenerating) {
-            // Track which IDs are currently generating before each poll
-            var generatingIds = reports.filter { it.status == "generating" }.map { it.id }.toSet()
             while (true) {
                 delay(3_000)
                 loadPage(currentPage)
-                // Any ID that was generating and is now completed → notify
-                if (notificationsEnabled) {
-                    val nowCompleted = reports
-                        .filter { it.id in generatingIds && it.status == "completed" }
-                    if (nowCompleted.isNotEmpty()) {
-                        NotificationHelper.sendReportReady(context, notifTitle, notifBody)
-                    }
-                }
-                generatingIds = reports.filter { it.status == "generating" }.map { it.id }.toSet()
-                if (generatingIds.isEmpty()) break
+                if (reports.none { it.status == "generating" }) break
             }
+        }
+    }
+
+    // ── WebSocket-triggered refresh ───────────────────────────────────────────
+    // When the backend sends a "report ready" notification the WS manager emits
+    // an event here so the list refreshes immediately — before the next poll tick.
+    LaunchedEffect(Unit) {
+        WebSocketManager.reportReadyEvent.collect {
+            loadPage(currentPage)
         }
     }
 

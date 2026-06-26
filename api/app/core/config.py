@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     base_url: str = "http://localhost:8000"
 #     base_url: str = "https://finscan-production.up.railway.app"
 
+    # Admin key for the notifications panel (set in .env)
+    admin_key: str = ""
+
     gemini_api_key: str = ""
     gemini_model: str = ""
 

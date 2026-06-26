@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinScan · Notification Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --indigo:    #3F51B5;
+      --indigo-d:  #303F9F;
+      --indigo-l:  #7986CB;
+      --surface:   #FFFFFF;
+      --bg:        #F0F2F9;
+      --text:      #212121;
+      --subtext:   #757575;
+      --border:    #E0E0E0;
+      --green:     #4CAF50;
+      --red:       #F44336;
+      --amber:     #FF9800;
+      --radius:    12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--indigo);
+      color: #fff;
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+    header .logo { font-size: 22px; font-weight: 700; letter-spacing: -.5px; }
+    header .badge {
+      background: rgba(255,255,255,.18);
+      border-radius: 20px;
+      padding: 2px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* ── Layout ── */
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 700px) { main { grid-template-columns: 1fr; } }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .card h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--indigo);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Form ── */
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--subtext); margin-bottom: 6px; }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      transition: border-color .15s;
+      outline: none;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--indigo); }
+    textarea { min-height: 80px; resize: vertical; }
+    .form-group { margin-bottom: 18px; }
+
+    /* ── Target toggle ── */
+    .target-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .target-tab {
+      flex: 1;
+      padding: 9px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--subtext);
+      text-align: center;
+      transition: all .15s;
+    }
+    .target-tab.active {
+      border-color: var(--indigo);
+      background: var(--indigo);
+      color: #fff;
+    }
+
+    /* ── Button ── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--indigo);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+    }
+    .btn:hover  { background: var(--indigo-d); }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .5; cursor: default; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform .3s ease;
+      z-index: 999;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { background: var(--green); }
+    #toast.error   { background: var(--red); }
+
+    /* ── Connected users ── */
+    #connected-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background .15s;
+      border: 1.5px solid transparent;
+    }
+    .user-chip:hover  { background: #e8eaf6; }
+    .user-chip.sel    { border-color: var(--indigo); background: #e8eaf6; }
+    .user-chip .dot   { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .user-chip .uid   { font-weight: 700; color: var(--indigo); }
+    .user-chip .label { color: var(--subtext); }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 0;
+      color: var(--subtext);
+      font-size: 14px;
+    }
+    .empty-state .icon { font-size: 36px; margin-bottom: 8px; }
+
+    /* ── Stats bar ── */
+    .stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat {
+      flex: 1;
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .stat .val { font-size: 22px; font-weight: 800; color: var(--indigo); }
+    .stat .lbl { font-size: 11px; color: var(--subtext); font-weight: 600; text-transform: uppercase; }
+
+    /* ── Auth form ── */
+    #auth-overlay {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    #auth-box {
+      background: var(--surface);
+      padding: 40px;
+      border-radius: var(--radius);
+      width: 360px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.1);
+      text-align: center;
+    }
+    #auth-box .logo { font-size: 28px; font-weight: 800; color: var(--indigo); margin-bottom: 4px; }
+    #auth-box .sub  { font-size: 13px; color: var(--subtext); margin-bottom: 28px; }
+    #auth-error { color: var(--red); font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+    .refresh-btn {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--subtext);
+      font-weight: 600;
+      transition: border-color .15s;
+      margin-left: auto;
+      display: block;
+      margin-bottom: 14px;
+    }
+    .refresh-btn:hover { border-color: var(--indigo); color: var(--indigo); }
+  </style>
+</head>
+<body>
+
+<!-- ── Auth overlay ── -->
+<div id="auth-overlay">
+  <div id="auth-box">
+    <div class="logo">FinScan</div>
+    <div class="sub">Notification Admin Panel</div>
+    <div class="form-group">
+      <label for="admin-key-input">Admin Key</label>
+      <input id="admin-key-input" type="password" placeholder="Enter admin key" />
+    </div>
+    <button class="btn" onclick="login()">🔐 &nbsp;Enter</button>
+    <div id="auth-error"></div>
+  </div>
+</div>
+
+<!-- ── Main UI (hidden until auth) ── -->
+<div id="app" style="display:none">
+  <header>
+    <div class="logo">FinScan</div>
+    <div class="badge">Notification Admin</div>
+  </header>
+
+  <main>
+    <!-- LEFT: send form -->
+    <div class="card">
+      <h2>📤 &nbsp;Send Notification</h2>
+
+      <!-- Broadcast vs targeted -->
+      <div class="target-tabs">
+        <div class="target-tab active" id="tab-broadcast" onclick="setMode('broadcast')">📢 Broadcast</div>
+        <div class="target-tab"        id="tab-user"      onclick="setMode('user')">👤 Specific User</div>
+      </div>
+
+      <div class="form-group" id="user-id-group" style="display:none">
+        <label>User ID</label>
+        <input id="target-user-id" type="number" placeholder="e.g. 3" />
+      </div>
+
+      <div class="form-group">
+        <label>Title</label>
+        <input id="notif-title" type="text" placeholder="Notification title" value="Hello from FinScan 👋" />
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea id="notif-body" placeholder="Notification body text">Your attention is required.</textarea>
+      </div>
+
+      <button class="btn" id="send-btn" onclick="sendNotification()">
+        <span>🚀</span> Send Notification
+      </button>
+    </div>
+
+    <!-- RIGHT: connected users -->
+    <div>
+      <div class="card">
+        <h2>🟢 &nbsp;Connected Users</h2>
+        <div class="stats">
+          <div class="stat"><div class="val" id="stat-users">—</div><div class="lbl">Users</div></div>
+          <div class="stat"><div class="val" id="stat-conns">—</div><div class="lbl">Sockets</div></div>
+        </div>
+        <button class="refresh-btn" onclick="loadConnected()">↻ Refresh</button>
+        <div id="connected-list"><div class="empty-state"><div class="icon">📵</div>No users connected</div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  let adminKey = '';
+  let sendMode = 'broadcast'; // 'broadcast' | 'user'
+
+  /* ── Auth ────────────────────────────────────────────────── */
+  async function login() {
+    const key = document.getElementById('admin-key-input').value.trim();
+    if (!key) return;
+    // Quick test: hit /connected with the key
+    const r = await fetch('/api/v1/notifications/connected', {
+      headers: { 'X-Admin-Key': key }
+    });
+    if (r.ok) {
+      adminKey = key;
+      document.getElementById('auth-overlay').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadConnected();
+      setInterval(loadConnected, 10000); // auto-refresh every 10 s
+    } else {
+      document.getElementById('auth-error').textContent = 'Invalid key. Try again.';
+    }
+  }
+
+  document.getElementById('admin-key-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  /* ── Mode toggle ─────────────────────────────────────────── */
+  function setMode(mode) {
+    sendMode = mode;
+    document.getElementById('tab-broadcast').classList.toggle('active', mode === 'broadcast');
+    document.getElementById('tab-user').classList.toggle('active', mode === 'user');
+    document.getElementById('user-id-group').style.display = mode === 'user' ? 'block' : 'none';
+  }
+
+  /* ── Send ────────────────────────────────────────────────── */
+  async function sendNotification() {
+    const title = document.getElementById('notif-title').value.trim();
+    const body  = document.getElementById('notif-body').value.trim();
+    if (!title || !body) { toast('Fill in title and message', 'error'); return; }
+
+    const payload = { title, body };
+    if (sendMode === 'user') {
+      const uid = parseInt(document.getElementById('target-user-id').value);
+      if (!uid) { toast('Enter a valid User ID', 'error'); return; }
+      payload.user_id = uid;
+    }
+
+    const btn = document.getElementById('send-btn');
+    btn.disabled = true;
+
+    const r = await fetch('/api/v1/notifications/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+      body: JSON.stringify(payload)
+    });
+    btn.disabled = false;
+
+    if (r.ok) {
+      const data = await r.json();
+      const msg  = data.broadcast
+        ? `Broadcast sent to ${data.delivered_to} user(s)`
+        : data.delivered_to > 0 ? 'Notification delivered ✓' : 'User not connected (offline)';
+      toast(msg, data.delivered_to > 0 ? 'success' : 'error');
+    } else {
+      toast('Send failed', 'error');
+    }
+  }
+
+  /* ── Connected users ─────────────────────────────────────── */
+  async function loadConnected() {
+    const r = await fetch('/api/v1/notifications/connected', {
+      headers: { 'X-Admin-Key': adminKey }
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+
+    document.getElementById('stat-users').textContent = data.user_ids.length;
+    document.getElementById('stat-conns').textContent = data.total_connections;
+
+    const list = document.getElementById('connected-list');
+    if (data.user_ids.length === 0) {
+      list.innerHTML = '<div class="empty-state"><div class="icon">📵</div>No users connected</div>';
+      return;
+    }
+    list.innerHTML = data.user_ids.map(uid => `
+      <div class="user-chip" onclick="selectUser(${uid})" id="chip-${uid}">
+        <div class="dot"></div>
+        <span class="uid">#${uid}</span>
+        <span class="label">User ${uid}</span>
+      </div>
+    `).join('');
+  }
+
+  function selectUser(uid) {
+    setMode('user');
+    document.getElementById('target-user-id').value = uid;
+    document.querySelectorAll('.user-chip').forEach(c => c.classList.remove('sel'));
+    document.getElementById('chip-' + uid)?.classList.add('sel');
+  }
+
+  /* ── Toast ───────────────────────────────────────────────── */
+  function toast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show ' + type;
+    setTimeout(() => el.className = '', 3000);
+  }
+</script>
+</body>
+</html>
