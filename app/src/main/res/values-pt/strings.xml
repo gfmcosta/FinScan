@@ -178,6 +178,41 @@
     <string name="pick_gallery">Galeria</string>
     <string name="pick_files">Ficheiros</string>
 
+    <!-- Relatórios -->
+    <string name="report_generate_title">Gerar Relatório</string>
+    <string name="report_since_forever">Todo o tempo (desde sempre)</string>
+    <string name="report_date_from">Data de Início</string>
+    <string name="report_date_to">Data de Fim</string>
+    <string name="report_generate_button">Gerar Relatório</string>
+    <string name="report_generate_error">Erro ao gerar relatório. Tente novamente.</string>
+    <string name="report_history_title">Os Meus Relatórios</string>
+    <string name="report_empty">Ainda sem relatórios. Gere o seu primeiro acima!</string>
+    <string name="report_status_completed">Concluído</string>
+    <string name="report_status_generating">A Gerar</string>
+    <string name="report_status_failed">Falhou</string>
+    <string name="report_period_all_time">Todo o Tempo</string>
+    <string name="report_generated_at">Gerado: %s</string>
+    <string name="report_download">Descarregar PDF</string>
+    <string name="report_generating_hint">A gerar em segundo plano…</string>
+    <string name="report_storage_permission_title">Acesso ao Armazenamento</string>
+    <string name="report_storage_permission_rationale">O FinScan precisa de acesso ao armazenamento para guardar relatórios PDF no seu dispositivo.</string>
+    <string name="report_storage_permission_grant">Permitir Armazenamento</string>
+    <string name="report_load_error">Erro ao carregar relatórios</string>
+    <string name="report_delete_title">Eliminar Relatório</string>
+    <string name="report_delete_message">Tem a certeza que deseja eliminar este relatório?</string>
+    <string name="report_delete_error">Erro ao eliminar relatório</string>
+    <string name="report_filter_month">Mês</string>
+    <string name="report_filter_year">Ano</string>
+    <string name="report_filter_all">Todos</string>
+    <string name="report_error_future_date">As datas não podem ser no futuro</string>
+    <string name="report_error_date_order">A data de início deve ser anterior à data de fim</string>
+
+    <!-- Notificações -->
+    <string name="notif_channel_description">Notificações de relatórios concluídos</string>
+    <string name="notif_report_ready_title">Relatório pronto!</string>
+    <string name="notif_report_ready_body">O teu relatório foi gerado e está pronto para download.</string>
+    <string name="notif_permission_denied">Permite notificações nas definições do sistema para receber alertas.</string>
+
     <!-- Edit Profile -->
     <string name="edit_profile_title">Editar Perfil</string>
     <string name="edit_profile_name_label">Nome Completo</string>

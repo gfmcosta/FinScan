@@ -24,6 +24,8 @@ class SettingsManager(private val context: Context) {
         val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
         // String preference key language
         val LANGUAGE_KEY = stringPreferencesKey("language")
+        // Boolean preference key for notifications enabled
+        val NOTIFICATIONS_ENABLED_KEY = booleanPreferencesKey("notifications_enabled")
         
         // Singleton instance - initialized lazily on first access
         @Volatile
@@ -53,6 +55,15 @@ class SettingsManager(private val context: Context) {
             preferences[DARK_MODE_KEY] ?: false
         }
 
+    // Read notifications enabled preference (default false)
+    val notificationsEnabled: Flow<Boolean> = context.dataStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(emptyPreferences()) else throw exception
+        }
+        .map { preferences ->
+            preferences[NOTIFICATIONS_ENABLED_KEY] ?: false
+        }
+
     // Read language preference (returns system default if not set)
     val language: Flow<String> = context.dataStore.data
         .catch { exception ->
@@ -73,6 +84,12 @@ class SettingsManager(private val context: Context) {
     suspend fun setDarkMode(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[DARK_MODE_KEY] = enabled
+        }
+    }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[NOTIFICATIONS_ENABLED_KEY] = enabled
         }
     }
 

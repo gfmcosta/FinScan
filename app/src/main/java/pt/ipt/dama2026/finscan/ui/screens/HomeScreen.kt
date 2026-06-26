@@ -124,11 +124,6 @@ fun MainScreen() {
 }
 
 @Composable
-fun ReportsScreen() {
-    PlaceholderScreen("Reports Screen")
-}
-
-@Composable
 fun PlaceholderScreen(title: String) {
     Box(
         modifier = Modifier
