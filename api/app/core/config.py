@@ -21,7 +21,8 @@ class Settings(BaseSettings):
         return url
 
     # Public URL used in email links (e.g. https://finscan-production.up.railway.app)
-    base_url: str = "http://localhost:8000"
+#     base_url: str = "http://localhost:8000"
+    base_url: str = "https://finscan-production.up.railway.app"
 
     gemini_api_key: str = ""
     gemini_model: str = ""
