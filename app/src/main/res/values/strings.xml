@@ -85,6 +85,10 @@
     <string name="auth_error_empty_fields">Please fill in all fields</string>
     <string name="auth_error_empty_username">Username is required</string>
     <string name="auth_error_empty_name">Full name is required</string>
+    <string name="auth_error_name_has_numbers">Name must not contain numbers</string>
+    <string name="auth_error_name_leading_space">Name cannot start with a space</string>
+    <string name="auth_error_username_spaces">Username must not contain spaces</string>
+    <string name="auth_error_email_spaces">Email must not contain spaces</string>
     <string name="auth_error_username_short">Username must be at least 3 characters</string>
     <string name="auth_error_empty_email">Email is required</string>
     <string name="auth_error_invalid_email">Please enter a valid email</string>
@@ -136,6 +140,8 @@
     <string name="categories_delete_error">Failed to delete category</string>
     <string name="categories_delete_has_receipts">Cannot delete category with existing receipts</string>
     <string name="categories_name_invalid">Category name cannot contain numbers</string>
+    <string name="categories_name_empty">Category name is required</string>
+    <string name="categories_name_leading_space">Category name cannot start with a space</string>
     <string name="categories_icon_label">Icon</string>
 
     <!-- Receipt Detail Strings -->

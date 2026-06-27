@@ -275,10 +275,12 @@ fun EditProfileScreen(onBack: () -> Unit = {}) {
             // Form
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
 
-                // Username
+                // Username — no spaces allowed
                 OutlinedTextField(
                     value = username,
-                    onValueChange = { username = it; usernameError = "" },
+                    onValueChange = { input ->
+                        if (!input.contains(' ')) { username = input; usernameError = "" }
+                    },
                     label = { Text(stringResource(R.string.edit_profile_username_label)) },
                     singleLine = true,
                     isError = usernameError.isNotEmpty(),
@@ -290,10 +292,12 @@ fun EditProfileScreen(onBack: () -> Unit = {}) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Name
+                // Name — no digits, no leading space
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it; nameError = "" },
+                    onValueChange = { input ->
+                        if (!input.any { it.isDigit() } && !input.startsWith(' ')) { name = input; nameError = "" }
+                    },
                     label = { Text(stringResource(R.string.edit_profile_name_label)) },
                     singleLine = true,
                     isError = nameError.isNotEmpty(),
@@ -305,10 +309,12 @@ fun EditProfileScreen(onBack: () -> Unit = {}) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Email
+                // Email — no spaces allowed
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it; emailError = ""; pendingNewEmail = null },
+                    onValueChange = { input ->
+                        if (!input.contains(' ')) { email = input; emailError = ""; pendingNewEmail = null }
+                    },
                     label = { Text(stringResource(R.string.edit_profile_email_label)) },
                     singleLine = true,
                     isError = emailError.isNotEmpty(),
@@ -345,10 +351,25 @@ fun EditProfileScreen(onBack: () -> Unit = {}) {
                 Button(
                     onClick = {
                         var valid = true
-                        if (username.isBlank()) { usernameError = context.getString(R.string.edit_profile_username_empty); valid = false }
-                        if (name.isBlank()) { nameError = context.getString(R.string.edit_profile_name_empty); valid = false }
+                        // Username
+                        when {
+                            username.isBlank()      -> { usernameError = context.getString(R.string.edit_profile_username_empty); valid = false }
+                            username.contains(' ')  -> { usernameError = context.getString(R.string.auth_error_username_spaces); valid = false }
+                            username.length < 3     -> { usernameError = context.getString(R.string.auth_error_username_short); valid = false }
+                        }
+                        // Name
+                        when {
+                            name.isBlank()              -> { nameError = context.getString(R.string.edit_profile_name_empty); valid = false }
+                            name.startsWith(' ')        -> { nameError = context.getString(R.string.auth_error_name_leading_space); valid = false }
+                            name.any { it.isDigit() }   -> { nameError = context.getString(R.string.auth_error_name_has_numbers); valid = false }
+                        }
+                        // Email
                         val emailRegex = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
-                        if (!emailRegex.matches(email.trim())) { emailError = context.getString(R.string.edit_profile_email_invalid); valid = false }
+                        when {
+                            email.isBlank()            -> { emailError = context.getString(R.string.edit_profile_email_invalid); valid = false }
+                            email.contains(' ')        -> { emailError = context.getString(R.string.auth_error_email_spaces); valid = false }
+                            !emailRegex.matches(email.trim()) -> { emailError = context.getString(R.string.edit_profile_email_invalid); valid = false }
+                        }
                         if (!valid) return@Button
 
                         isLoading = true
