@@ -128,9 +128,11 @@ fun RegisterScreen(
             // Username TextField
             OutlinedTextField(
                 value = username,
-                onValueChange = {
-                    username = it
-                    errorMessage = ""
+                onValueChange = { input ->
+                    if (!input.contains(' ')) {
+                        username = input
+                        errorMessage = ""
+                    }
                 },
                 label = { Text(stringResource(R.string.auth_username_hint)) },
                 modifier = Modifier
@@ -149,9 +151,12 @@ fun RegisterScreen(
             // Name TextField
             OutlinedTextField(
                 value = name,
-                onValueChange = {
-                    name = it
-                    errorMessage = ""
+                onValueChange = { input ->
+                    // Reject digits and leading spaces
+                    if (!input.any { it.isDigit() } && !input.startsWith(' ')) {
+                        name = input
+                        errorMessage = ""
+                    }
                 },
                 label = { Text(stringResource(R.string.auth_name_hint)) },
                 modifier = Modifier
@@ -170,9 +175,11 @@ fun RegisterScreen(
             // Email TextField
             OutlinedTextField(
                 value = email,
-                onValueChange = {
-                    email = it
-                    errorMessage = ""
+                onValueChange = { input ->
+                    if (!input.contains(' ')) {
+                        email = input
+                        errorMessage = ""
+                    }
                 },
                 label = { Text(stringResource(R.string.auth_email_hint)) },
                 modifier = Modifier
@@ -405,9 +412,12 @@ private fun validateRegisterForm(
 ): String? {
     return when {
         username.isEmpty() -> context.getString(R.string.auth_error_empty_username)
+        username.contains(' ') -> context.getString(R.string.auth_error_username_spaces)
         username.length < 3 -> context.getString(R.string.auth_error_username_short)
         name.isEmpty() -> context.getString(R.string.auth_error_empty_name)
+        name.any { it.isDigit() } -> context.getString(R.string.auth_error_name_has_numbers)
         email.isEmpty() -> context.getString(R.string.auth_error_empty_email)
+        email.contains(' ') -> context.getString(R.string.auth_error_email_spaces)
         !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> context.getString(R.string.auth_error_invalid_email)
         password.isEmpty() -> context.getString(R.string.auth_error_empty_password)
         password.length < 6 -> context.getString(R.string.auth_error_password_short)

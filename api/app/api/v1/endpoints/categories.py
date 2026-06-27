@@ -31,12 +31,23 @@ def list_categories(
     )
 
 
+def _validate_category_name(name: str) -> None:
+    """Raise HTTPException if the category name fails validation."""
+    if not name or not name.strip():
+        raise HTTPException(status_code=400, detail="Category name is required")
+    if name.startswith(" "):
+        raise HTTPException(status_code=400, detail="Category name cannot start with a space")
+    if any(c.isdigit() for c in name):
+        raise HTTPException(status_code=400, detail="Category name cannot contain numbers")
+
+
 @router.post("", response_model=CategoryRead, status_code=201)
 def create_category(
     payload: CategoryCreate,
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> Category:
+    _validate_category_name(payload.name)
     existing = (
         db.query(Category)
         .filter(
@@ -71,6 +82,7 @@ def update_category(
         raise HTTPException(status_code=404, detail="Category not found")
     if category.owner_id is not None and category.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your category")
+    _validate_category_name(payload.name)
     category.name = payload.name
     if payload.icon is not None:
         category.icon = payload.icon

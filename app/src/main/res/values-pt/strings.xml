@@ -85,6 +85,10 @@
     <string name="auth_error_empty_fields">Por favor, preencha todos os campos</string>
     <string name="auth_error_empty_username">Nome de utilizador é obrigatório</string>
     <string name="auth_error_empty_name">Nome completo é obrigatório</string>
+    <string name="auth_error_name_has_numbers">O nome não pode conter números</string>
+    <string name="auth_error_name_leading_space">O nome não pode começar com um espaço</string>
+    <string name="auth_error_username_spaces">O nome de utilizador não pode ter espaços</string>
+    <string name="auth_error_email_spaces">O email não pode ter espaços</string>
     <string name="auth_error_username_short">Nome de utilizador deve ter pelo menos 3 caracteres</string>
     <string name="auth_error_empty_email">E-mail é obrigatório</string>
     <string name="auth_error_invalid_email">Por favor, introduza um e-mail válido</string>
@@ -136,6 +140,8 @@
     <string name="categories_delete_error">Erro ao eliminar categoria</string>
     <string name="categories_delete_has_receipts">Não é possível eliminar uma categoria com recibos associados</string>
     <string name="categories_name_invalid">O nome da categoria não pode conter números</string>
+    <string name="categories_name_empty">O nome da categoria é obrigatório</string>
+    <string name="categories_name_leading_space">O nome da categoria não pode começar com um espaço</string>
     <string name="categories_icon_label">Ícone</string>
 
     <!-- Detalhes do Recibo -->

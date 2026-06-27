@@ -39,8 +39,14 @@ def register(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Role must be either 'admin' or 'user'")
     if user_in.username.strip() == "" or user_in.email.strip() == "" or user_in.password.strip() == "":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username, email, and password cannot be empty")
+    if " " in user_in.username:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username must not contain spaces")
+    if " " in user_in.email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email must not contain spaces")
     if user_in.email.count("@") != 1 or "." not in user_in.email.split("@")[1]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email format")
+    if user_in.name and any(c.isdigit() for c in user_in.name):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Name must not contain numbers")
 
     verification_token = secrets.token_urlsafe(32)
 

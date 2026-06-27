@@ -404,12 +404,25 @@ fun CategoryFormDialog(
 ) {
     var name by remember { mutableStateOf(initialName) }
     var selectedIcon by remember { mutableStateOf(initialIcon) }
-    val hasError = name.any { it.isDigit() }
-    val nameLabel = stringResource(R.string.categories_name_label)
-    val invalidMessage = stringResource(R.string.categories_name_invalid)
-    val iconLabel = stringResource(R.string.categories_icon_label)
-    val saveLabel = stringResource(R.string.categories_save)
-    val cancelLabel = stringResource(R.string.categories_cancel)
+    var touched by remember { mutableStateOf(false) }
+
+    val nameLabel      = stringResource(R.string.categories_name_label)
+    val msgEmpty       = stringResource(R.string.categories_name_empty)
+    val msgNumbers     = stringResource(R.string.categories_name_invalid)
+    val msgLeadSpace   = stringResource(R.string.categories_name_leading_space)
+    val iconLabel      = stringResource(R.string.categories_icon_label)
+    val saveLabel      = stringResource(R.string.categories_save)
+    val cancelLabel    = stringResource(R.string.categories_cancel)
+
+    // Compute error only after the user has interacted with the field
+    val nameError: String? = if (!touched) null else when {
+        name.isBlank()         -> msgEmpty
+        name.startsWith(' ')   -> msgLeadSpace
+        name.any { it.isDigit() } -> msgNumbers
+        else                   -> null
+    }
+    val canSave = nameError == null && name.isNotBlank()
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -417,11 +430,14 @@ fun CategoryFormDialog(
             Column {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it.filter { c -> !c.isDigit() } },
+                    onValueChange = { input ->
+                        touched = true
+                        name = input
+                    },
                     label = { Text(nameLabel) },
                     singleLine = true,
-                    isError = hasError,
-                    supportingText = if (hasError) {{ Text(invalidMessage) }} else null,
+                    isError = nameError != null,
+                    supportingText = nameError?.let { { Text(it) } },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = IndigoTechnological),
                     modifier = Modifier.fillMaxWidth()
@@ -440,8 +456,11 @@ fun CategoryFormDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { if (name.isNotBlank()) onSave(name.trim(), selectedIcon) }) {
-                Text(saveLabel, color = IndigoTechnological)
+            TextButton(
+                onClick = { if (canSave) onSave(name.trim(), selectedIcon) },
+                enabled = canSave
+            ) {
+                Text(saveLabel, color = if (canSave) IndigoTechnological else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))
             }
         },
         dismissButton = {

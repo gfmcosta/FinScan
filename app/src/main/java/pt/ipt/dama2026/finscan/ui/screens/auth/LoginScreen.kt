@@ -115,9 +115,11 @@ fun LoginScreen(
             // Username TextField
             OutlinedTextField(
                 value = username,
-                onValueChange = {
-                    username = it
-                    errorMessage = ""
+                onValueChange = { input ->
+                    if (!input.contains(' ')) {
+                        username = input
+                        errorMessage = ""
+                    }
                 },
                 label = { Text(stringResource(R.string.auth_username_hint)) },
                 modifier = Modifier
