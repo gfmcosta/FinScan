@@ -35,7 +35,18 @@
     <string name="about_us_institution_label">Institution</string>
     <string name="about_us_institution_name">Polytechnic Institute of Tomar</string>
     <string name="about_us_version_label">Version</string>
-    
+    <string name="about_us_academic_label">Academic Information</string>
+    <string name="about_us_course">Computer Engineering</string>
+    <string name="about_us_uc">Advanced Mobile Application Development</string>
+    <string name="about_us_academic_year">2025/2026</string>
+    <string name="about_us_student_id">Nº 23692 — Gonçalo Costa</string>
+    <string name="about_us_libraries_label">Libraries &amp; Frameworks</string>
+    <string name="about_us_libraries_source">Source</string>
+    <string name="about_us_label_course">Course</string>
+    <string name="about_us_label_uc">Course Unit</string>
+    <string name="about_us_label_year">Academic Year</string>
+    <string name="about_us_label_author">Author</string>
+
     <!-- Change Password Strings -->
     <string name="change_password_title">Change Password</string>
     <string name="change_password_subtitle">Choose a strong password for your security</string>
