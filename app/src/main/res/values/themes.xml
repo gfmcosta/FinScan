@@ -3,5 +3,7 @@
     <style name="Theme.FinScan" parent="android:Theme.Material.Light.NoActionBar">
 <!--        This line allows me to initialize the app without the default SplashScreen from android-->
 <!--        <item name="android:windowIsTranslucent">true</item>-->
+        <!-- Prevent Android/MIUI from force-applying dark mode on top of Compose's own theming -->
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 </resources>
