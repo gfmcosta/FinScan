@@ -54,7 +54,8 @@ sealed class BottomNavItem(val route: String, val icon: ImageVector, val labelRe
 fun MainScreen() {
     // object to control what item is selected (nav item)
     var selectedItem by remember { mutableIntStateOf(0) }
-    
+    var showChat by remember { mutableStateOf(false) }
+
     // Remember items to avoid recreating list on every recomposition
     val items = remember {
         listOf(
@@ -66,7 +67,24 @@ fun MainScreen() {
         )
     }
 
+    if (showChat) {
+        ChatBotSheet(onDismiss = { showChat = false })
+    }
+
     Scaffold(
+        floatingActionButton = {
+            // Hide FAB on ScanScreen to avoid overlapping the camera controls
+            if (selectedItem != 2) {
+                FloatingActionButton(
+                    onClick = { showChat = true },
+                    containerColor = IndigoTechnological,
+                    contentColor = Color.White,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Icon(Icons.Default.SmartToy, contentDescription = null)
+                }
+            }
+        },
         bottomBar = {
             Surface(
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),

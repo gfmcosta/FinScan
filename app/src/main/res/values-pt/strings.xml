@@ -226,6 +226,14 @@
     <string name="report_no_receipts">É necessário ter pelo menos um recibo antes de gerar um relatório.</string>
     <string name="report_no_receipts_in_range">Não existem recibos no período de datas selecionado.</string>
 
+    <!-- Chatbot -->
+    <string name="chat_title">Assistente FinScan</string>
+    <string name="chat_subtitle">Pergunta-me sobre as tuas despesas</string>
+    <string name="chat_greeting">Olá! Sou o teu assistente FinScan. Pergunta-me o que quiseres sobre as tuas despesas, categorias ou hábitos de consumo.</string>
+    <string name="chat_input_hint">Escreve uma pergunta…</string>
+    <string name="chat_error">Desculpa, não consegui processar a tua pergunta. Tenta novamente.</string>
+    <string name="chat_error_network">Sem ligação. Verifica a tua internet e tenta novamente.</string>
+
     <!-- Notificações -->
     <string name="notif_channel_description">Notificações de relatórios concluídos</string>
     <string name="notif_report_ready_title">Relatório pronto!</string>
