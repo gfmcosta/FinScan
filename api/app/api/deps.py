@@ -34,7 +34,12 @@ def get_current_user(
     except ValueError:
         raise credentials_exception
 
-    user = db.query(User).filter(User.username == payload.sub).first()
+    try:
+        user_id = int(payload.sub)
+    except (ValueError, TypeError):
+        raise credentials_exception
+
+    user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise credentials_exception
     return user

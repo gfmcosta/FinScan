@@ -223,6 +223,8 @@
     <string name="report_filter_all">All</string>
     <string name="report_error_future_date">Dates cannot be in the future</string>
     <string name="report_error_date_order">Start date must be before end date</string>
+    <string name="report_no_receipts">You need at least one receipt before generating a report.</string>
+    <string name="report_no_receipts_in_range">No receipts found in the selected date range.</string>
 
     <!-- Notifications -->
     <string name="notif_channel_description">Notifications for completed reports</string>

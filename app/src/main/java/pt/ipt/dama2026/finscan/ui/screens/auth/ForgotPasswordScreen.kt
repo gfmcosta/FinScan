@@ -164,7 +164,7 @@ fun ForgotPasswordScreen(
                             errorMessage = context.getString(R.string.auth_error_invalid_email)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = IndigoTechnological),
                     enabled = !isLoading
@@ -253,7 +253,7 @@ fun ForgotPasswordScreen(
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = IndigoTechnological),
                     enabled = !isLoading

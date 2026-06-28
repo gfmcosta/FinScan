@@ -38,7 +38,8 @@ data class ToastState(
 fun CustomToast(
     state: ToastState,
     onDismiss: () -> Unit = {},
-    duration: Long = 3000
+    duration: Long = 3000,
+    alignment: Alignment = Alignment.BottomCenter
 ) {
     if (state.isVisible) {
         LaunchedEffect(state) {
@@ -46,11 +47,16 @@ fun CustomToast(
             onDismiss()
         }
 
+        val padding = if (alignment == Alignment.TopCenter)
+            PaddingValues(top = 32.dp, start = 16.dp, end = 16.dp)
+        else
+            PaddingValues(bottom = 32.dp, start = 16.dp, end = 16.dp)
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 32.dp, start = 16.dp, end = 16.dp),
-            contentAlignment = Alignment.BottomCenter
+                .padding(padding),
+            contentAlignment = alignment
         ) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),

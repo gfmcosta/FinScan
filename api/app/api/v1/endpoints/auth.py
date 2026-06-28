@@ -122,8 +122,8 @@ def login(
     if user.is_verified is False:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="email_not_verified")
 
-    access_token = create_access_token(subject=user.username, role=user.role.value)
-    refresh_token = create_refresh_token(subject=user.username, role=user.role.value)
+    access_token = create_access_token(subject=str(user.id), role=user.role.value)
+    refresh_token = create_refresh_token(subject=str(user.id), role=user.role.value)
     return Token(access_token=access_token, refresh_token=refresh_token, name=user.name, email=user.email)
 
 
@@ -193,12 +193,17 @@ def refresh(payload: RefreshRequest, db: Annotated[Session, Depends(get_db)]) ->
     except ValueError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired refresh token")
 
-    user = db.query(User).filter(User.username == token_data.sub).first()
+    try:
+        user_id = int(token_data.sub)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject")
+
+    user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
-    access_token = create_access_token(subject=user.username, role=user.role.value)
-    new_refresh_token = create_refresh_token(subject=user.username, role=user.role.value)
+    access_token = create_access_token(subject=str(user.id), role=user.role.value)
+    new_refresh_token = create_refresh_token(subject=str(user.id), role=user.role.value)
     return Token(access_token=access_token, refresh_token=new_refresh_token, name=user.name, email=user.email)
 
 

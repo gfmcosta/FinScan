@@ -92,6 +92,7 @@ dependencies {
     implementation(libs.camera.camera2)
     implementation(libs.camera.lifecycle)
     implementation(libs.camera.view)
+    implementation(libs.androidx.exifinterface)
     implementation(libs.play.services.location)
     implementation(libs.coil.compose)
 

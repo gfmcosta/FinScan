@@ -35,6 +35,7 @@ import pt.ipt.dama2026.finscan.R
 import pt.ipt.dama2026.finscan.data.api.ApiClient
 import pt.ipt.dama2026.finscan.data.api.models.GenerateReportRequest
 import pt.ipt.dama2026.finscan.data.api.models.ReportResponse
+import pt.ipt.dama2026.finscan.data.api.services.ReceiptApiService
 import pt.ipt.dama2026.finscan.data.api.services.ReportApiService
 import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
 import pt.ipt.dama2026.finscan.ui.theme.*
@@ -337,6 +338,8 @@ fun ReportsScreen() {
     var reports      by remember { mutableStateOf<List<ReportResponse>>(emptyList()) }
     var isLoading    by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var hasReceiptsInRange by remember { mutableStateOf(true) } // true by default to avoid initial flash
+    var isRangeChecking    by remember { mutableStateOf(false) }
     var currentPage  by remember { mutableIntStateOf(1) }
     var hasNextPage  by remember { mutableStateOf(false) }
 
@@ -404,6 +407,23 @@ fun ReportsScreen() {
     LaunchedEffect(filterMonth, filterYear) {
         currentPage = 1
         loadPage(1)
+    }
+
+    // Check receipts for the selected date range (re-fires whenever dates or toggle change)
+    LaunchedEffect(sinceForever, dateFromMs, dateToMs) {
+        isRangeChecking = true
+        try {
+            val receiptApi = ApiClient.getRetrofit().create(ReceiptApiService::class.java)
+            val fromStr = if (!sinceForever) dateFromMs?.toApiDate() else null
+            val toStr   = if (!sinceForever) dateToMs?.toApiDate()   else null
+            val resp = receiptApi.getStats(startDate = fromStr, endDate = toStr)
+            hasReceiptsInRange = resp.isSuccessful &&
+                (resp.body()?.byCategory?.isNotEmpty() == true)
+        } catch (_: Exception) {
+            hasReceiptsInRange = true // don't block on network error
+        } finally {
+            isRangeChecking = false
+        }
     }
 
     // ── Polling while any report is "generating" (UI update only) ────────────
@@ -596,6 +616,36 @@ fun ReportsScreen() {
                     }
                 }
 
+                if (!hasReceiptsInRange && !isRangeChecking) {
+                    val noReceiptsMsg = if (!sinceForever && (dateFromMs != null || dateToMs != null))
+                        stringResource(R.string.report_no_receipts_in_range)
+                    else
+                        stringResource(R.string.report_no_receipts)
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                                RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Info, null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            noReceiptsMsg,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+
                 Spacer(Modifier.height(14.dp))
                 Button(
                     onClick = {
@@ -629,10 +679,10 @@ fun ReportsScreen() {
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
+                        .heightIn(min = 48.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = IndigoTechnological),
-                    enabled = !isGenerating && dateError.isEmpty()
+                    enabled = !isGenerating && dateError.isEmpty() && hasReceiptsInRange && !isRangeChecking
                 ) {
                     if (isGenerating) {
                         CircularProgressIndicator(
