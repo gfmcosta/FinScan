@@ -7,7 +7,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -352,6 +356,7 @@ fun ReportsScreen() {
     val years        = (currentYear downTo currentYear - 5).toList()
 
     // Generate form state
+    var generateSectionExpanded by remember { mutableStateOf(true) }
     var sinceForever   by remember { mutableStateOf(false) }
     var dateFromMs     by remember { mutableStateOf<Long?>(null) }
     var dateToMs       by remember { mutableStateOf<Long?>(null) }
@@ -539,11 +544,32 @@ fun ReportsScreen() {
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    stringResource(R.string.report_generate_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
+                // ── Collapsible header ────────────────────────────────────────
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { generateSectionExpanded = !generateSectionExpanded }
+                ) {
+                    Text(
+                        stringResource(R.string.report_generate_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Icon(
+                        imageVector = if (generateSectionExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        tint = getAdaptiveSubtext()
+                    )
+                }
+
+                AnimatedVisibility(
+                    visible = generateSectionExpanded,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                Column {
                 Spacer(Modifier.height(12.dp))
 
                 // Since-forever toggle
@@ -696,6 +722,8 @@ fun ReportsScreen() {
                         Text(stringResource(R.string.report_generate_button))
                     }
                 }
+                } // end Column inside AnimatedVisibility
+                } // end AnimatedVisibility
             }
         }
 

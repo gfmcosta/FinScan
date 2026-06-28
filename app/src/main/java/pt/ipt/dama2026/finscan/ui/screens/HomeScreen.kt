@@ -237,13 +237,13 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp),
+                .heightIn(min = 100.dp),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = IndigoTechnological)
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(IndigoTechnological, HomeMonthlyCardGradientEnd)

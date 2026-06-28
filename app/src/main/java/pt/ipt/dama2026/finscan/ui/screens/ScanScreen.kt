@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.os.Build
+import android.view.Surface
 import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
 import android.util.Base64
@@ -403,7 +405,11 @@ private fun ErrorScreen(message: String, onRetry: () -> Unit) {
 private fun CameraContent(onPhotoTaken: (File) -> Unit, onPickFile: () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val previewView = remember { PreviewView(context) }
+    val previewView = remember {
+        PreviewView(context).apply {
+            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+        }
+    }
     val imageCapture = remember { ImageCapture.Builder().build() }
     val executor = remember { Executors.newSingleThreadExecutor() }
 
@@ -411,7 +417,17 @@ private fun CameraContent(onPhotoTaken: (File) -> Unit, onPickFile: () -> Unit) 
         val future = ProcessCameraProvider.getInstance(context)
         future.addListener({
             val provider = future.get()
-            val preview = Preview.Builder().build().also { it.surfaceProvider = previewView.surfaceProvider }
+            val rotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                context.display?.rotation ?: Surface.ROTATION_0
+            } else {
+                @Suppress("DEPRECATION")
+                (context.getSystemService(android.content.Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
+            }
+            imageCapture.targetRotation = rotation
+            val preview = Preview.Builder()
+                .setTargetRotation(rotation)
+                .build()
+                .also { it.surfaceProvider = previewView.surfaceProvider }
             try {
                 provider.unbindAll()
                 provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture)

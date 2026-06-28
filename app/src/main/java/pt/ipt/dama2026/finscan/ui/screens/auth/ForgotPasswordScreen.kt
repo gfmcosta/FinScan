@@ -58,7 +58,9 @@ fun ForgotPasswordScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding() // Primeiro padding da barra de estado
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
             .padding(horizontal = 24.dp)
     ) {
         // Compensação extra para igualar ao ecrã de Language (que está dentro de outro Scaffold)

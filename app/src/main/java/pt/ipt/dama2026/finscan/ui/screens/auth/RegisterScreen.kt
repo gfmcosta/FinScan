@@ -61,6 +61,8 @@ fun RegisterScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
             .padding(horizontal = 24.dp)
     ) {
         // Compensação extra para igualar ao ecrã de Language
