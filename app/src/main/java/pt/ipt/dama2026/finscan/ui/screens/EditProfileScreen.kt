@@ -429,7 +429,7 @@ fun EditProfileScreen(onBack: () -> Unit = {}) {
                         }
                     },
                     enabled = !isLoading,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = IndigoTechnological)
                 ) {

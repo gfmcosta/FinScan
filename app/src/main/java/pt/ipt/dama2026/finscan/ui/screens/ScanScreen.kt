@@ -3,6 +3,12 @@ package pt.ipt.dama2026.finscan.ui.screens
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.os.Build
+import android.view.Surface
+import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
@@ -95,6 +101,7 @@ fun ScanScreen() {
     var scannedReceipt by remember { mutableStateOf<ReceiptResponse?>(null) }
     var errorMessage by remember { mutableStateOf("") }
     var showPickerSheet by remember { mutableStateOf(false) }
+    var capturedFile by remember { mutableStateOf<File?>(null) }
 
     // ── API call ──────────────────────────────────────────────────────────────
     suspend fun sendToApi(bytes: ByteArray, mimeType: String, location: Pair<Double, Double>?) {
@@ -224,9 +231,9 @@ fun ScanScreen() {
                 onSkip = { scanState = ScanState.CAMERA }
             )
 
-            ScanState.CAMERA, ScanState.PROCESSING -> CameraContent(
-                isProcessing = scanState == ScanState.PROCESSING,
+            ScanState.CAMERA -> CameraContent(
                 onPhotoTaken = { file ->
+                    capturedFile = file
                     scanState = ScanState.PROCESSING
                     scope.launch {
                         try {
@@ -237,11 +244,21 @@ fun ScanScreen() {
                             scanState = ScanState.ERROR
                         } finally {
                             file.delete()
+                            capturedFile = null
                         }
                     }
                 },
                 onPickFile = onPickPressed
             )
+
+            ScanState.PROCESSING -> {
+                val frozen = capturedFile
+                if (frozen != null) {
+                    FrozenPhotoProcessing(file = frozen)
+                } else {
+                    GenericProcessingScreen()
+                }
+            }
 
             ScanState.ERROR -> ErrorScreen(
                 message = errorMessage,
@@ -385,10 +402,14 @@ private fun ErrorScreen(message: String, onRetry: () -> Unit) {
 // ─── Camera content ───────────────────────────────────────────────────────────
 
 @Composable
-private fun CameraContent(isProcessing: Boolean, onPhotoTaken: (File) -> Unit, onPickFile: () -> Unit) {
+private fun CameraContent(onPhotoTaken: (File) -> Unit, onPickFile: () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val previewView = remember { PreviewView(context) }
+    val previewView = remember {
+        PreviewView(context).apply {
+            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+        }
+    }
     val imageCapture = remember { ImageCapture.Builder().build() }
     val executor = remember { Executors.newSingleThreadExecutor() }
 
@@ -396,7 +417,17 @@ private fun CameraContent(isProcessing: Boolean, onPhotoTaken: (File) -> Unit, o
         val future = ProcessCameraProvider.getInstance(context)
         future.addListener({
             val provider = future.get()
-            val preview = Preview.Builder().build().also { it.surfaceProvider = previewView.surfaceProvider }
+            val rotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                context.display?.rotation ?: Surface.ROTATION_0
+            } else {
+                @Suppress("DEPRECATION")
+                (context.getSystemService(android.content.Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
+            }
+            imageCapture.targetRotation = rotation
+            val preview = Preview.Builder()
+                .setTargetRotation(rotation)
+                .build()
+                .also { it.surfaceProvider = previewView.surfaceProvider }
             try {
                 provider.unbindAll()
                 provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture)
@@ -429,7 +460,7 @@ private fun CameraContent(isProcessing: Boolean, onPhotoTaken: (File) -> Unit, o
         ) {
             // Gallery button — left
             IconButton(
-                onClick = onPickFile, enabled = !isProcessing,
+                onClick = onPickFile,
                 modifier = Modifier.align(Alignment.CenterStart).size(52.dp).background(Color.White.copy(alpha = 0.2f), CircleShape)
             ) {
                 Icon(Icons.Default.PhotoLibrary, contentDescription = stringResource(R.string.scan_pick_file), tint = Color.White, modifier = Modifier.size(28.dp))
@@ -437,7 +468,7 @@ private fun CameraContent(isProcessing: Boolean, onPhotoTaken: (File) -> Unit, o
 
             // Capture button — centre
             CaptureButton(
-                enabled = !isProcessing,
+                enabled = true,
                 modifier = Modifier.align(Alignment.Center),
                 onClick = {
                     val photoFile = File(context.cacheDir, "receipt_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())}.jpg")
@@ -450,17 +481,71 @@ private fun CameraContent(isProcessing: Boolean, onPhotoTaken: (File) -> Unit, o
             )
         }
 
-        // Processing overlay
-        if (isProcessing) {
-            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.65f)), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(52.dp), strokeWidth = 3.dp)
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(stringResource(R.string.scan_processing), color = Color.White, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(stringResource(R.string.scan_processing_subtitle), color = Color.White.copy(alpha = 0.7f), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 48.dp))
-                }
+    }
+}
+
+// ─── Frozen photo + processing overlay (shown after capture, camera disposed) ──
+
+private fun rotateBitmapToExif(file: File): Bitmap? {
+    val bitmap = BitmapFactory.decodeFile(file.absolutePath) ?: return null
+    val exif = try { ExifInterface(file.absolutePath) } catch (_: Exception) { return bitmap }
+    val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+    val degrees = when (orientation) {
+        ExifInterface.ORIENTATION_ROTATE_90  -> 90f
+        ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+        ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+        else -> 0f
+    }
+    if (degrees == 0f) return bitmap
+    val matrix = Matrix().apply { postRotate(degrees) }
+    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        .also { if (it != bitmap) bitmap.recycle() }
+}
+
+@Composable
+private fun FrozenPhotoProcessing(file: File) {
+    val bitmap = remember(file) { rotateBitmapToExif(file) }
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        if (bitmap != null) {
+            AndroidView(
+                factory = { ctx ->
+                    android.widget.ImageView(ctx).apply {
+                        scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+                    }
+                },
+                update = { view -> view.setImageBitmap(bitmap) },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(52.dp), strokeWidth = 3.dp)
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(stringResource(R.string.scan_processing), color = Color.White, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(stringResource(R.string.scan_processing_subtitle), color = Color.White.copy(alpha = 0.7f), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 48.dp))
             }
+        }
+    }
+}
+
+// ─── Generic loading screen (gallery / PDF) ───────────────────────────────────
+
+@Composable
+private fun GenericProcessingScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator(color = IndigoTechnological, modifier = Modifier.size(52.dp), strokeWidth = 3.dp)
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(stringResource(R.string.scan_processing), color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(stringResource(R.string.scan_processing_subtitle), color = getAdaptiveSubtext(), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 48.dp))
         }
     }
 }

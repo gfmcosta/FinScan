@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
 import pt.ipt.dama2026.finscan.data.datastore.AuthManager
 import pt.ipt.dama2026.finscan.utils.NotificationHelper
@@ -85,6 +87,17 @@ class MainActivity : ComponentActivity() {
                 // Also re-provide LocalActivityResultRegistryOwner because overriding
                 // LocalContext with a ContextWrapper drops it during recomposition.
                 val activity = this@MainActivity
+                // Keep status bar / nav bar icon colours in sync with the app's own
+                // theme choice — not the system theme. Without this, MIUI and other
+                // skins leave light-coloured icons on a white background (invisible)
+                // when the system is in dark mode but the app is in light mode.
+                val window = this@MainActivity.window
+                SideEffect {
+                    val controller = WindowCompat.getInsetsController(window, window.decorView)
+                    controller.isAppearanceLightStatusBars     = !useDarkMode
+                    controller.isAppearanceLightNavigationBars = !useDarkMode
+                }
+
                 CompositionLocalProvider(
                     LocalConfiguration provides configuration,
                     LocalContext provides wrappedContext,

@@ -58,7 +58,9 @@ fun ForgotPasswordScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding() // Primeiro padding da barra de estado
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
             .padding(horizontal = 24.dp)
     ) {
         // Compensação extra para igualar ao ecrã de Language (que está dentro de outro Scaffold)
@@ -164,7 +166,7 @@ fun ForgotPasswordScreen(
                             errorMessage = context.getString(R.string.auth_error_invalid_email)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = IndigoTechnological),
                     enabled = !isLoading
@@ -253,7 +255,7 @@ fun ForgotPasswordScreen(
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = IndigoTechnological),
                     enabled = !isLoading

@@ -16,12 +16,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import pt.ipt.dama2026.finscan.R
 import pt.ipt.dama2026.finscan.data.api.ApiClient
 import pt.ipt.dama2026.finscan.data.api.models.ExpenseStats
@@ -233,13 +237,13 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp),
+                .heightIn(min = 100.dp),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = IndigoTechnological)
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(IndigoTechnological, HomeMonthlyCardGradientEnd)
@@ -318,12 +322,10 @@ fun HomeScreen(onNavigateToSettings: () -> Unit = {}) {
                         LightBlue
                     )
 
-                    val maxTotal = remember(topCategories) {
-                        topCategories.maxOfOrNull { it.total } ?: 1.0
-                    }
-                    val chartData = remember(topCategories, maxTotal) {
+                    val chartData = remember(topCategories, monthlyTotal) {
+                        val total = monthlyTotal.takeIf { it > 0 } ?: 1.0
                         topCategories.mapIndexed { index, cat ->
-                            (cat.total / maxTotal).toFloat() to chartColors[index % chartColors.size]
+                            (cat.total / total).toFloat() to chartColors[index % chartColors.size]
                         }
                     }
 
@@ -365,54 +367,67 @@ fun BarChartPlaceholder(
     data: List<Pair<Float, Color>>,
     modifier: Modifier = Modifier
 ) {
-    val labels = listOf("100%", "75%", "50%", "25%", "0%")
+    val subtextColor = getAdaptiveSubtext()
+    val labelColorArgb = subtextColor.toArgb()
+    val labelTextSizePx = with(LocalDensity.current) { 10.sp.toPx() }
 
-    Row(modifier = modifier) {
-        // Y-Axis Labels
-        Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(vertical = 4.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.End
-        ) {
-            labels.forEach { label ->
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = getAdaptiveSubtext()
-                )
-            }
+    Canvas(modifier = modifier) {
+        val labelWidthPx = 36.dp.toPx()
+        val gapPx = 8.dp.toPx()
+        val chartLeft = labelWidthPx + gapPx
+        val chartWidth = size.width - chartLeft
+        val chartHeight = size.height
+
+        val percentages = listOf(1f, 0.75f, 0.5f, 0.25f, 0f)
+        val percentLabels = listOf("100%", "75%", "50%", "25%", "0%")
+
+        val labelPaint = android.graphics.Paint().apply {
+            color = labelColorArgb
+            textSize = labelTextSizePx
+            textAlign = android.graphics.Paint.Align.RIGHT
+            isAntiAlias = true
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        // Gridlines and Y-axis labels — both drawn at the same y, so always aligned
+        percentages.forEachIndexed { i, pct ->
+            val y = chartHeight * (1f - pct)
+
+            drawLine(
+                color = subtextColor.copy(alpha = 0.15f),
+                start = androidx.compose.ui.geometry.Offset(chartLeft, y),
+                end = androidx.compose.ui.geometry.Offset(size.width, y),
+                strokeWidth = 0.5.dp.toPx()
+            )
+
+            drawContext.canvas.nativeCanvas.drawText(
+                percentLabels[i],
+                labelWidthPx,
+                y + labelTextSizePx / 3f,
+                labelPaint
+            )
+        }
 
         // Bars
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-        ) {
-            val width = size.width
-            val height = size.height
+        if (data.isEmpty()) return@Canvas
+        val barCount = data.size
+        val barWidth = chartWidth / (barCount * 1.8f)
+        val totalSpacing = chartWidth - barCount * barWidth
+        val spacing = if (barCount > 1) totalSpacing / (barCount - 1) else 0f
 
-            val barCount = data.size
-            val barWidth = width / (barCount * 1.5f)
-            val spacing = if (barCount > 1) (width - (barCount * barWidth)) / (barCount - 1) else 0f
-
-            data.forEachIndexed { index, (value, color) ->
-                val x = index * (barWidth + spacing)
-                val barHeight = value * height * 0.9f // Padding top
-
-                drawRoundRect(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(color, color.copy(alpha = 0.7f))
-                    ),
-                    topLeft = androidx.compose.ui.geometry.Offset(x, height - barHeight),
-                    size = androidx.compose.ui.geometry.Size(barWidth, barHeight),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx())
-                )
-            }
+        data.forEachIndexed { index, (value, color) ->
+            val x = chartLeft + index * (barWidth + spacing)
+            val barHeight = value * chartHeight
+            if (barHeight <= 0f) return@forEachIndexed
+            drawRoundRect(
+                brush = Brush.verticalGradient(
+                    colors = listOf(color, color.copy(alpha = 0.7f)),
+                    startY = chartHeight - barHeight,
+                    endY = chartHeight
+                ),
+                topLeft = androidx.compose.ui.geometry.Offset(x, chartHeight - barHeight),
+                size = androidx.compose.ui.geometry.Size(barWidth, barHeight),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx())
+            )
         }
     }
 }

@@ -223,6 +223,8 @@
     <string name="report_filter_all">Todos</string>
     <string name="report_error_future_date">As datas não podem ser no futuro</string>
     <string name="report_error_date_order">A data de início deve ser anterior à data de fim</string>
+    <string name="report_no_receipts">É necessário ter pelo menos um recibo antes de gerar um relatório.</string>
+    <string name="report_no_receipts_in_range">Não existem recibos no período de datas selecionado.</string>
 
     <!-- Notificações -->
     <string name="notif_channel_description">Notificações de relatórios concluídos</string>

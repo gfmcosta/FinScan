@@ -63,7 +63,7 @@ fun ReceiptsScreen() {
         try {
             val resp = catApi.listCategories(skip = 0, limit = 100)
             if (resp.isSuccessful) {
-                categories = resp.body() ?: emptyList()
+                categories = (resp.body() ?: emptyList()).sortedBy { it.name.lowercase() }
             }
         } catch (_: Exception) {}
     }

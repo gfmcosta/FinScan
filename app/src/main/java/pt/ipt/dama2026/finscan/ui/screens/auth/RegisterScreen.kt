@@ -61,6 +61,8 @@ fun RegisterScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
             .padding(horizontal = 24.dp)
     ) {
         // Compensação extra para igualar ao ecrã de Language
@@ -320,7 +322,7 @@ fun RegisterScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
+                    .heightIn(min = 50.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = IndigoTechnological
@@ -398,7 +400,8 @@ fun RegisterScreen(
 
     CustomToast(
         state = toastState,
-        onDismiss = { toastState = toastState.copy(isVisible = false) }
+        onDismiss = { toastState = toastState.copy(isVisible = false) },
+        alignment = androidx.compose.ui.Alignment.TopCenter
     )
 }
 
