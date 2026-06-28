@@ -226,6 +226,14 @@
     <string name="report_no_receipts">You need at least one receipt before generating a report.</string>
     <string name="report_no_receipts_in_range">No receipts found in the selected date range.</string>
 
+    <!-- Chatbot -->
+    <string name="chat_title">FinScan Assistant</string>
+    <string name="chat_subtitle">Ask me about your expenses</string>
+    <string name="chat_greeting">Hi! I\'m your FinScan assistant. Ask me anything about your expenses, categories or spending habits.</string>
+    <string name="chat_input_hint">Ask something…</string>
+    <string name="chat_error">Sorry, I couldn\'t process your question. Please try again.</string>
+    <string name="chat_error_network">No connection. Please check your internet and try again.</string>
+
     <!-- Notifications -->
     <string name="notif_channel_description">Notifications for completed reports</string>
     <string name="notif_report_ready_title">Report ready!</string>
