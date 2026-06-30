@@ -74,7 +74,7 @@ fun SettingsScreen() {
         "settings" -> SettingsMainContent(
             name = displayName,
             username = username ?: "",
-            avatarBase64 = avatar,
+            avatarFilename = avatar,
             currentDarkMode = currentDarkMode,
             settingsManager = settingsManager,
             scope = scope,
@@ -107,7 +107,7 @@ fun SettingsScreen() {
 fun SettingsMainContent(
     name: String,
     username: String,
-    avatarBase64: String? = null,
+    avatarFilename: String? = null,
     currentDarkMode: Boolean,
     settingsManager: SettingsManager,
     scope: kotlinx.coroutines.CoroutineScope,
@@ -211,7 +211,7 @@ fun SettingsMainContent(
                     .background(SettingsProfilePlaceholderColor),
                 contentAlignment = Alignment.Center
             ) {
-                val avatarUrl = remember(avatarBase64) { ApiClient.avatarUrl(avatarBase64) }
+                val avatarUrl = remember(avatarFilename) { ApiClient.avatarUrl(avatarFilename) }
                 if (avatarUrl != null) {
                     AsyncImage(
                         model = avatarUrl,

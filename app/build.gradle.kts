@@ -5,11 +5,13 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-// Read BASE_URL from local.properties (gitignored — safe for secrets)
+// Load local.properties
 val localProps = Properties().also { props ->
     val file = rootProject.file("local.properties")
     if (file.exists()) props.load(file.inputStream())
 }
+
+// Get BASE_URL from local.properties or use default (development) value
 val baseUrl: String = localProps.getProperty("BASE_URL", "http://10.0.2.2:8000/api/v1/")
 
 android {
@@ -29,23 +31,24 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Inject BASE_URL so ApiClient can read it without hardcoding
+        // Inject BASE_URL into BuildConfig so it can be accessed in the app code or use default value if not set in local.properties
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
+    // Configure signing for release build (Play Store) using local.properties
     signingConfigs {
         create("release") {
-            storeFile     = rootProject.file(localProps.getProperty("KEYSTORE_PATH", "finscan.jks"))
+            storeFile = rootProject.file(localProps.getProperty("KEYSTORE_PATH", "finscan.jks"))
             storePassword = localProps.getProperty("KEYSTORE_PASSWORD", "")
-            keyAlias      = localProps.getProperty("KEY_ALIAS", "finscan")
-            keyPassword   = localProps.getProperty("KEY_PASSWORD", "")
+            keyAlias = localProps.getProperty("KEY_ALIAS", "finscan")
+            keyPassword = localProps.getProperty("KEY_PASSWORD", "")
         }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig   = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

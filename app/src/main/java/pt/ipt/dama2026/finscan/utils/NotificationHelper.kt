@@ -8,34 +8,43 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import pt.ipt.dama2026.finscan.MainActivity
 import pt.ipt.dama2026.finscan.R
 
+/**
+ * Helper class for notifications.
+ */
 object NotificationHelper {
 
-    const val CHANNEL_ID   = "finscan_reports"
+    const val CHANNEL_ID = "finscan_reports"
     const val CHANNEL_NAME = "Reports"
     private var notificationId = 1000
 
-    /** Call once on app startup (e.g. in MainActivity.onCreate). */
+    /**
+     * Creates a notification channel for reports.
+     * @param context The application context.
+     */
     fun createChannel(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = context.getString(R.string.notif_channel_description)
-            }
-            val manager = context.getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = context.getString(R.string.notif_channel_description)
         }
+        val manager = context.getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
     }
 
-    /** Returns true if the app actually has permission to post notifications. */
+    /**
+     * Checks if the app actually has permission to post notifications.
+     * @param context The application context.
+     * @return True if the app has permission, false otherwise.
+     */
     fun hasPermission(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
@@ -48,8 +57,11 @@ object NotificationHelper {
 
     /**
      * Posts a notification that a report is ready.
-     * Tapping it opens the app on the Reports tab (MainActivity handles the intent).
+     * @param context The application context.
+     * @param title The notification title
+     * @param body The notification body
      */
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     fun sendReportReady(context: Context, title: String, body: String) {
         if (!hasPermission(context)) return
 

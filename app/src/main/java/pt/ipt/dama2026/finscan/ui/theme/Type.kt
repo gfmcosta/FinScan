@@ -50,7 +50,7 @@ val Typography = Typography(
         lineHeight = 40.sp,
         letterSpacing = (-0.5).sp
     ),
-    
+
     // Medium titles
     headlineMedium = TextStyle(
         fontFamily = interFontFamily,
@@ -59,7 +59,7 @@ val Typography = Typography(
         lineHeight = 36.sp,
         letterSpacing = 0.sp
     ),
-    
+
     // Small titles
     headlineSmall = TextStyle(
         fontFamily = interFontFamily,
@@ -68,7 +68,7 @@ val Typography = Typography(
         lineHeight = 32.sp,
         letterSpacing = 0.sp
     ),
-    
+
     // Section title / Card
     titleLarge = TextStyle(
         fontFamily = interFontFamily,
@@ -77,7 +77,7 @@ val Typography = Typography(
         lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),
-    
+
     // Item title
     titleMedium = TextStyle(
         fontFamily = interFontFamily,
@@ -86,7 +86,7 @@ val Typography = Typography(
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp
     ),
-    
+
     // Big body Text
     bodyLarge = TextStyle(
         fontFamily = interFontFamily,
@@ -95,7 +95,7 @@ val Typography = Typography(
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
     ),
-    
+
     // Main body text
     bodyMedium = TextStyle(
         fontFamily = interFontFamily,
@@ -104,7 +104,7 @@ val Typography = Typography(
         lineHeight = 20.sp,
         letterSpacing = 0.25.sp
     ),
-    
+
     // Small body text
     bodySmall = TextStyle(
         fontFamily = interFontFamily,
@@ -113,7 +113,7 @@ val Typography = Typography(
         lineHeight = 16.sp,
         letterSpacing = 0.4.sp
     ),
-    
+
     // Big Label
     labelLarge = TextStyle(
         fontFamily = interFontFamily,
@@ -122,7 +122,7 @@ val Typography = Typography(
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp
     ),
-    
+
     // Medium Label - Buttons
     labelMedium = TextStyle(
         fontFamily = interFontFamily,
@@ -131,7 +131,7 @@ val Typography = Typography(
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
     ),
-    
+
     // Small Label - Badges / tags
     labelSmall = TextStyle(
         fontFamily = interFontFamily,

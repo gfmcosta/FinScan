@@ -23,17 +23,31 @@ import kotlinx.coroutines.delay
 import pt.ipt.dama2026.finscan.ui.theme.AmberAlert
 import pt.ipt.dama2026.finscan.ui.theme.EmeraldGreen
 import pt.ipt.dama2026.finscan.ui.theme.IndigoTechnological
+import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * Represents the different types of toasts.
+ */
 enum class ToastType {
     SUCCESS, ERROR, WARNING, INFO
 }
 
+/**
+ * Represents the state of a toast.
+ */
 data class ToastState(
     val message: String = "",
     val type: ToastType = ToastType.INFO,
     val isVisible: Boolean = false
 )
 
+/**
+ * A composable that displays a toast message.
+ * @param state The state of the toast.
+ * @param onDismiss Callback to be invoked when the toast is dismissed.
+ * @param duration Duration of the toast in milliseconds.
+ * @param alignment Alignment of the toast. Default is [Alignment.BottomCenter].
+ */
 @Composable
 fun CustomToast(
     state: ToastState,
@@ -43,7 +57,7 @@ fun CustomToast(
 ) {
     if (state.isVisible) {
         LaunchedEffect(state) {
-            delay(duration)
+            delay(duration.milliseconds)
             onDismiss()
         }
 
@@ -96,6 +110,11 @@ fun CustomToast(
     }
 }
 
+/**
+ * Returns the background color for a toast based on its type.
+ * @param type The type of the toast.
+ * @return The background color.
+ */
 @Composable
 private fun getToastBackgroundColor(type: ToastType): Color {
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
@@ -108,6 +127,11 @@ private fun getToastBackgroundColor(type: ToastType): Color {
     }
 }
 
+/**
+ * Returns the text color for a toast based on its type.
+ * @param type The type of the toast.
+ * @return The text color.
+ */
 @Composable
 private fun getToastTextColor(type: ToastType): Color {
     return when (type) {
@@ -118,6 +142,11 @@ private fun getToastTextColor(type: ToastType): Color {
     }
 }
 
+/**
+ * Returns the icon color for a toast based on its type.
+ * @param type The type of the toast.
+ * @return The icon color.
+ */
 @Composable
 private fun getToastIconColor(type: ToastType): Color {
     return when (type) {
@@ -128,6 +157,11 @@ private fun getToastIconColor(type: ToastType): Color {
     }
 }
 
+/**
+ * Returns the icon for a toast based on its type.
+ * @param type The type of the toast.
+ * @return The icon.
+ */
 private fun getToastIcon(type: ToastType): ImageVector {
     return when (type) {
         ToastType.SUCCESS -> Icons.Default.CheckCircle

@@ -48,5 +48,6 @@ fun isDarkTheme(): Boolean = MaterialTheme.colorScheme.background.luminance() < 
 // Dynamic Colors Helpers
 @Composable
 fun getAdaptiveSubtext() = if (isDarkTheme()) Color.LightGray else SettingsSubtextColor
+
 @Composable
 fun getAdaptiveControlColor() = if (isDarkTheme()) SettingsArrowDarkColor else SettingsArrowColor

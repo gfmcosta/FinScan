@@ -1,7 +1,9 @@
 package pt.ipt.dama2026.finscan.utils
 
+import android.Manifest
 import android.content.Context
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,10 +24,15 @@ import pt.ipt.dama2026.finscan.data.api.ApiClient
 import pt.ipt.dama2026.finscan.data.datastore.AuthManager
 import pt.ipt.dama2026.finscan.data.datastore.SettingsManager
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "WebSocketManager"
-private const val PING_INTERVAL_MS = 25_000L   // send "ping" every 25 s
-private const val RECONNECT_DELAY_MS = 5_000L  // wait 5 s before reconnecting
+
+// Send "ping" every 25s
+private const val PING_INTERVAL_MS = 25_000L
+
+// Wait 5s before reconnecting
+private const val RECONNECT_DELAY_MS = 5_000L
 
 /**
  * Singleton that maintains a persistent WebSocket connection to the backend
@@ -39,25 +46,30 @@ object WebSocketManager {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val httpClient = OkHttpClient.Builder()
-        .pingInterval(0, TimeUnit.SECONDS)   // we handle pings manually
+        .pingInterval(0, TimeUnit.SECONDS)
         .build()
 
     private var socket: WebSocket? = null
     private var isConnected = false
     private var shouldReconnect = false
 
-    /** Emits whenever a report-ready notification is received. Collect in ReportsScreen to refresh immediately. */
+    // Emits whenever a report-ready notification is received. Collect in ReportsScreen to refresh immediately.
     private val _reportReadyEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val reportReadyEvent: SharedFlow<Unit> = _reportReadyEvent.asSharedFlow()
 
-    // ── Public API ────────────────────────────────────────────────────────────
-
+    /**
+     * Connects to the backend WebSocket service.
+     * @param context The application context.
+     */
     fun connect(context: Context) {
         if (isConnected) return
         shouldReconnect = true
         scope.launch { openSocket(context) }
     }
 
+    /**
+     * Disconnects from the backend WebSocket service.
+     */
     fun disconnect() {
         shouldReconnect = false
         socket?.close(1000, "Logout")
@@ -66,8 +78,10 @@ object WebSocketManager {
         Log.i(TAG, "Disconnected")
     }
 
-    // ── Internal ──────────────────────────────────────────────────────────────
-
+    /**
+     * Opens a WebSocket connection to the backend notification service.
+     * @param context The application context.
+     */
     private suspend fun openSocket(context: Context) {
         val token = AuthManager.getInstance(context).getTokenSync() ?: run {
             Log.w(TAG, "No token — skipping WS connect")
@@ -77,40 +91,42 @@ object WebSocketManager {
         // Build WS URL from the HTTP base URL (http→ws, https→wss)
         val baseUrl = ApiClient.ROOT_URL
             .replace("https://", "wss://")
-            .replace("http://",  "ws://")
+            .replace("http://", "ws://")
         val wsUrl = "${baseUrl}api/v1/notifications/ws?token=$token"
 
         val request = Request.Builder().url(wsUrl).build()
         socket = httpClient.newWebSocket(request, object : WebSocketListener() {
 
-            override fun onOpen(ws: WebSocket, response: Response) {
+            override fun onOpen(webSocket: WebSocket, response: Response) {
                 isConnected = true
                 Log.i(TAG, "Connected to $wsUrl")
                 // Start heartbeat pings
                 scope.launch {
                     while (isConnected) {
-                        delay(PING_INTERVAL_MS)
-                        ws.send("ping")
+                        delay(PING_INTERVAL_MS.milliseconds)
+                        webSocket.send("ping")
                     }
                 }
             }
 
-            override fun onMessage(ws: WebSocket, text: String) {
+            @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+            override fun onMessage(webSocket: WebSocket, text: String) {
                 Log.d(TAG, "Message: $text")
                 handleMessage(context, text)
             }
 
-            override fun onMessage(ws: WebSocket, bytes: ByteString) {
+            @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
                 handleMessage(context, bytes.utf8())
             }
 
-            override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 isConnected = false
                 Log.w(TAG, "WS failure: ${t.message}")
                 scheduleReconnect(context)
             }
 
-            override fun onClosed(ws: WebSocket, code: Int, reason: String) {
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 isConnected = false
                 Log.i(TAG, "WS closed: $code $reason")
                 if (code != 1000) scheduleReconnect(context)
@@ -118,13 +134,19 @@ object WebSocketManager {
         })
     }
 
+    /**
+     * Handles an incoming WebSocket message.
+     * @param context The application context.
+     * @param text The message text.
+     */
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private fun handleMessage(context: Context, text: String) {
         try {
             val json = JSONObject(text)
             val type = json.optString("type")
             if (type == "notification") {
-                val title  = json.optString("title", "FinScan")
-                val body   = json.optString("body", "")
+                val title = json.optString("title", "FinScan")
+                val body = json.optString("body", "")
                 val action = json.optJSONObject("data")?.optString("action") ?: ""
                 scope.launch {
                     // Trigger an immediate UI refresh in ReportsScreen
@@ -145,11 +167,15 @@ object WebSocketManager {
         }
     }
 
+    /**
+     * Schedules a reconnection attempt after a delay.
+     * @param context The application context.
+     */
     private fun scheduleReconnect(context: Context) {
         if (!shouldReconnect) return
         Log.i(TAG, "Reconnecting in ${RECONNECT_DELAY_MS}ms…")
         scope.launch {
-            delay(RECONNECT_DELAY_MS)
+            delay(RECONNECT_DELAY_MS.milliseconds)
             if (shouldReconnect) openSocket(context)
         }
     }

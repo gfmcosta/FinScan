@@ -1,5 +1,6 @@
 package pt.ipt.dama2026.finscan.data.datastore
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -16,24 +17,33 @@ import java.io.IOException
 // Extension property to create DataStore instance
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-// Responsible Class to manage settings
+/**
+ * Responsible Class to manage settings
+ * @param context The application context
+ */
+@Suppress("DEPRECATION")
 class SettingsManager(private val context: Context) {
 
     companion object {
         // Boolean preference key for dark mode active
         val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
+
         // String preference key language
         val LANGUAGE_KEY = stringPreferencesKey("language")
+
         // Boolean preference key for notifications enabled
         val NOTIFICATIONS_ENABLED_KEY = booleanPreferencesKey("notifications_enabled")
-        
+
         // Singleton instance - initialized lazily on first access
+        @SuppressLint("StaticFieldLeak")
         @Volatile
         private var instance: SettingsManager? = null
-        
+
         /**
          * Returns singleton instance of SettingsManager
          * Thread-safe using double-checked locking
+         * @param context The application context
+         * @return SettingsManager instance
          */
         fun getInstance(context: Context): SettingsManager {
             return instance ?: synchronized(this) {
@@ -67,9 +77,9 @@ class SettingsManager(private val context: Context) {
     // Read language preference (returns system default if not set)
     val language: Flow<String> = context.dataStore.data
         .catch { exception ->
-            if (exception is IOException){
+            if (exception is IOException) {
                 emit(emptyPreferences())
-            }else{
+            } else {
                 throw exception
             }
         }
@@ -87,6 +97,10 @@ class SettingsManager(private val context: Context) {
         }
     }
 
+    /**
+     * Function to set if the user wants notifications enabled
+     * @param enabled represents the permission to activate notifications
+     */
     suspend fun setNotificationsEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[NOTIFICATIONS_ENABLED_KEY] = enabled
@@ -97,7 +111,7 @@ class SettingsManager(private val context: Context) {
      * Function to set the user's preference language
      * @param lang represents the preference language that the user wants to use
      */
-    suspend fun setLanguage(lang: String){
+    suspend fun setLanguage(lang: String) {
         context.dataStore.edit { preferences ->
             preferences[LANGUAGE_KEY] = lang
         }

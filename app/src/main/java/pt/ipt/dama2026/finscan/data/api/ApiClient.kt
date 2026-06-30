@@ -1,6 +1,8 @@
 package pt.ipt.dama2026.finscan.data.api
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
 import okhttp3.OkHttpClient
@@ -16,23 +18,41 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
+/**
+ * Class responsible for creating and managing Retrofit instances.
+ */
 object ApiClient {
-    // Injected at build time from local.properties (see app/build.gradle.kts)
-    private val BASE_URL: String = BuildConfig.BASE_URL
+    // Injected at build time from local.properties
+    private const val BASE_URL: String = BuildConfig.BASE_URL
 
     // Root URL used for static assets (e.g. avatar images at /uploads/<filename>)
-    val ROOT_URL: String get() = BASE_URL.removeSuffix("api/v1/")  // e.g. "http://10.0.2.2:8000/"
+    val ROOT_URL: String get() = BASE_URL.removeSuffix("api/v1/")
 
+    /**
+     * Builds a URL for an avatar image.
+     * @param filename The filename of the avatar image.
+     * @return The full URL or null if the filename is null or blank.
+     */
     fun avatarUrl(filename: String?): String? =
         if (filename.isNullOrBlank()) null else "${ROOT_URL}uploads/$filename"
 
+    @SuppressLint("StaticFieldLeak")
     private var authManager: AuthManager? = null
     private var retrofit: Retrofit? = null
 
+    /**
+     * Initializes the ApiClient with the application context.
+     * @param context The application context.
+     */
     fun initialize(context: Context) {
         authManager = AuthManager.getInstance(context)
     }
 
+    /**
+     * Returns the Retrofit instance.
+     * If it doesn't exist, it creates a new one.
+     * @return The Retrofit instance.
+     */
     fun getRetrofit(): Retrofit {
         if (retrofit == null) {
             retrofit = buildRetrofit()
@@ -40,6 +60,10 @@ object ApiClient {
         return retrofit!!
     }
 
+    /**
+     * Builds a new Retrofit instance.
+     * @return The new Retrofit instance.
+     */
     private fun buildRetrofit(): Retrofit {
         val httpClientBuilder = OkHttpClient.Builder()
 
@@ -61,6 +85,12 @@ object ApiClient {
             .build()
     }
 
+    /**
+     * Adds authentication headers to each request.
+     * If the request is to /auth/login, /auth/register, or /auth/refresh,
+     * it doesn't add the Authorization header.
+     * @return The interceptor.
+     */
     private fun authInterceptor(): Interceptor = Interceptor { chain ->
         val originalRequest = chain.request()
         val path = originalRequest.url.encodedPath
@@ -85,7 +115,8 @@ object ApiClient {
      * Called automatically by OkHttp on every 401 response.
      * Tries to get a new access token using the stored refresh token.
      * If the refresh succeeds, the original request is retried transparently.
-     * If the refresh fails (expired/invalid), auth is cleared → UI navigates to login.
+     * If the refresh fails (expired/invalid), auth is cleared → UI navigates to log in.
+     * @return An authenticator.
      */
     private fun tokenAuthenticator(): Authenticator = object : Authenticator {
         override fun authenticate(route: Route?, response: okhttp3.Response): Request? {
@@ -93,7 +124,7 @@ object ApiClient {
             val path = response.request.url.encodedPath
             if (path.contains("auth/refresh") || path.contains("auth/login")) return null
 
-            // Don't retry more than once (priorResponse means we already tried)
+            // Don't retry more than once
             if (response.priorResponse != null) return null
 
             val refreshToken = runBlocking { authManager?.getRefreshTokenSync() }
@@ -119,6 +150,7 @@ object ApiClient {
                     refreshRetrofit.create(AuthApiService::class.java)
                         .refreshToken(RefreshTokenRequest(refreshToken))
                 } catch (e: Exception) {
+                    Log.e("ApiClient", "Error refreshing token", e)
                     null
                 }
             }
@@ -137,9 +169,5 @@ object ApiClient {
                 .header("Authorization", "Bearer ${body.accessToken}")
                 .build()
         }
-    }
-
-    fun resetRetrofit() {
-        retrofit = null
     }
 }
